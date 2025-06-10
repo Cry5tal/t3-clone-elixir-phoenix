@@ -1,0 +1,28 @@
+<.header>
+  Chat {@chat.id}
+  <:subtitle>This is a chat record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/chats_admin/#{@chat}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit chat</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Id">{@chat.id}</:item>
+  <:item title="Name">{@chat.name}</:item>
+  <:item title="User">{@chat.user_id}</:item>
+</.list>
+
+<.back navigate={~p"/chats_admin"}>Back to chats</.back>
+
+<.modal :if={@live_action == :edit} id="chat-modal" show on_cancel={JS.patch(~p"/chats_admin/#{@chat}")}>
+  <.live_component
+    module={T3CloneElixirWeb.ChatLive.FormComponent}
+    id={@chat.id}
+    title={@page_title}
+    action={@live_action}
+    chat={@chat}
+    patch={~p"/chats_admin/#{@chat}"}
+  />
+</.modal>

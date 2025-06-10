@@ -4,6 +4,8 @@ defmodule T3CloneElixirWeb.PageController do
   def home(conn, _params) do
     # The home page is often custom made,
     # so skip the default app layout.
-    render(conn, :home, layout: false)
+    conn
+      |>redirect(to: ~p"/chats")
+      |> halt()
   end
 end

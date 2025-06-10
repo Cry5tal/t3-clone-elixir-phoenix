@@ -7,19 +7,32 @@ const path = require("path")
 
 module.exports = {
   content: [
-    "./js/**/*.js",
-    "../lib/t3_clone_elixir_web.ex",
-    "../lib/t3_clone_elixir_web/**/*.*ex"
+    './js/**/*.{js,ts,jsx,tsx}',
+    '../lib/*_web.ex',
+    '../lib/*_web/**/*.*ex',
+    '../lib/*_web/**/*.*heex',
+    '../lib/t3_clone_elixir_web/**/*.*heex',
+    './node_modules/flowbite/**/*.js'
   ],
   theme: {
     extend: {
       colors: {
-        brand: "#FD4F00",
+        "primary-100": "#1F3A5F",
+        "primary-200": "#4d648d",
+        "primary-300": "#acc2ef",
+        "accent-100": "#3D5A80",
+        "accent-200": "#cee8ff",
+        "text-100": "#FFFFFF",
+        "text-200": "#e0e0e0",
+        "bg-100": "#0F1C2E",
+        "bg-200": "#1f2b3e",
+        "bg-300": "#374357",
       }
     },
   },
   plugins: [
-    require("@tailwindcss/forms"),
+    //require("@tailwindcss/forms"),
+    require('flowbite/plugin'),
     // Allows prefixing tailwind classes with LiveView classes to add rules
     // only when LiveView classes are applied, for example:
     //

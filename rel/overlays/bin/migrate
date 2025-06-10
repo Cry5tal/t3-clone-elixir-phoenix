@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+cd -P -- "$(dirname -- "$0")"
+exec ./t3_clone_elixir eval T3CloneElixir.Release.migrate

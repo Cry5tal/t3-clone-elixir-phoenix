@@ -62,15 +62,15 @@ Frontend: LiveView + JS-hooks, минимальный дизайн Tailwind CSS 
 Роадмап (9–17 июня 2025):
 
 9 июня (День 1):
-• Инициализация репозитория на GitHub, создание ветки main, базовый README
-• Генерация проекта Phoenix LiveView с phx.gen.auth
-• Подключение pythonx и пример «Hello world» скрипта
-• Написание базового Dockerfile (Elixir, Node.js, Python)
-• Настройка GitHub Actions: билд Docker → пуш в GitHub Packages
+• Инициализация репозитория на GitHub, создание ветки main, базовый README (DONE)
+• Генерация проекта Phoenix LiveView с phx.gen.auth (DONE)
+• Подключение pythonx и пример «Hello world» скрипта (IN PROGRESS)
+• Написание базового Dockerfile (Elixir, Node.js, Python) (IN PROGRESS)
+• Настройка GitHub Actions: билд Docker → пуш в GitHub Packages (BACKLOGED)
 
 10 июня (День 2):
 • Абстракция LLM-провайдеров: модуль LLM.Runner с паттерн-матчингом
-• Реализация generate_completion через Pythonx для OpenAI/OpenRouter
+• Реализация generate_completion через Pythonx для OpenRouter
 • Тестовый LiveView-endpoint: выбор провайдера, отправка промпта, отображение первого токена
 
 11 июня (День 3):
@@ -79,7 +79,7 @@ Frontend: LiveView + JS-hooks, минимальный дизайн Tailwind CSS 
 • Тесты производительности (эмуляция 100–200 токенов/сек)
 
 12 июня (День 4):
-• CRUD для чатов и сообщений (Ecto, Postgres)
+• CRUD для чатов и сообщений (Ecto, Postgres) (IN PROGRESS)
 • UI: список чатов, создание, удаление, переключение между чатами
 • Выбор модели и провайдера при создании чата
 
@@ -115,4 +115,3 @@ Frontend: LiveView + JS-hooks, минимальный дизайн Tailwind CSS 
 Оформление: минималистичный UI, преимущественно LiveView без избыточного JS
 
 Документация: inline доки, примеры запросов, скрипты миграций
-

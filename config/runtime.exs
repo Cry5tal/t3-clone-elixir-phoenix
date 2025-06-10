@@ -51,6 +51,8 @@ if config_env() == :prod do
   host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
 
+  config :t3_clone_elixir, :openrouter_api_key, System.get_env("OPENROUTER_API_KEY")
+
   config :t3_clone_elixir, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
   config :t3_clone_elixir, T3CloneElixirWeb.Endpoint,
