@@ -37,3 +37,8 @@ npm-debug.log
 
 #Elixir ls
 .elixir_ls
+
+#Env
+/.env
+/.env.fish
+

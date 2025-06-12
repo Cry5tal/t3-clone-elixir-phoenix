@@ -69,14 +69,14 @@ Frontend: LiveView + JS-hooks, минимальный дизайн Tailwind CSS 
 • Настройка GitHub Actions: билд Docker → пуш в GitHub Packages (BACKLOGED)
 
 10 июня (День 2):
-• Абстракция LLM-провайдеров: модуль LLM.Runner с паттерн-матчингом
-• Реализация generate_completion через Pythonx для OpenRouter
-• Тестовый LiveView-endpoint: выбор провайдера, отправка промпта, отображение первого токена
+• Абстракция LLM-провайдеров: модуль T3CloneElixir.ChatServer с паттерн-матчингом (DONE)
+• Реализация generate_completion через Pythonx для OpenRouter (IN PROGRESS
+• Тестовый LiveView-endpoint: выбор провайдера, отправка промпта, отображение первого токена (IN PROGRESS)
 
 11 июня (День 3):
 • Полноценный стриминг токенов: фоновые Task → Pythonx → handle_info → push_event → JS-hook
-• Настройка JS-hook для аккумулирования токенов в DOM
-• Тесты производительности (эмуляция 100–200 токенов/сек)
+• Настройка JS-hook для аккумулирования токенов в DOM (DONE)
+• Тесты производительности (эмуляция 100–200 токенов/сек) (DONE)+-
 
 12 июня (День 4):
 • CRUD для чатов и сообщений (Ecto, Postgres) (IN PROGRESS)

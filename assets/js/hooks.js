@@ -58,6 +58,9 @@ export const ChatTokenStream = {
     });
     this.handleEvent("stream_done", () => {
       this.el.classList.remove("animate-pulse");
+      // Clear buffer and DOM content after stream is done to prevent duplication
+      this.buffer = "";
+      this.el.textContent = "";
     });
   }
 };

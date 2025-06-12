@@ -48,6 +48,7 @@ defmodule T3CloneElixirWeb.ChatLive.Home do
     selected_chat_id = socket.assigns.selected_chat_id
 
     cond do
+      # If no chat is selected, create a new chat
       is_nil(selected_chat_id) or selected_chat_id == "" ->
         # No chat open, create new chat and message
         case Chats.create_chat_with_message(user_id, content) do
@@ -61,12 +62,23 @@ defmodule T3CloneElixirWeb.ChatLive.Home do
           {:error, reason} ->
             {:noreply, socket |> put_flash(:error, "Failed to create chat: #{inspect(reason)}")}
         end
+      # If a chat is selected, add the message to the chat
       true ->
         case Chats.create_message(selected_chat_id, user_id, content, "user") do
           {:ok, _message} ->
             IO.inspect(:user_message_created, label: "[LiveView] User message created, updating UI")
-            messages = Chats.get_chat_messages(selected_chat_id, 10, 0)
-            ChatServer.generate_response(selected_chat_id, messages)
+            # Get all messages for the chat
+            messages = Chats.get_all_chat_messages(selected_chat_id)
+            
+            # Convert messages to the format expected by ChatServer/Completion
+            chat_history = Enum.map(messages, fn msg ->
+              %{"role" => msg.who, "content" => msg.content}
+            end)
+            
+            # Start the AI response generation
+            ChatServer.generate_response(selected_chat_id, chat_history)
+            
+            # Update the socket with the actual message structs for display
             {:noreply, assign(socket, messages: messages)}
           {:error, reason} ->
             IO.inspect(reason, label: "[LiveView] Failed to send message")
@@ -76,7 +88,25 @@ defmodule T3CloneElixirWeb.ChatLive.Home do
   end
 
 
+  def handle_event("rename_chat", %{"name" => name}, socket) do
+    chat_id = socket.assigns.selected_chat_id
+    case Chats.update_chat(chat_id, %{name: name}) do
+      {:ok, _chat} ->
+        {:noreply, socket |> put_flash(:info, "Chat renamed successfully")}
+      {:error, reason} ->
+        {:noreply, socket |> put_flash(:error, "Failed to rename chat: #{inspect(reason)}")}
+    end
+  end
 
+
+  def handle_event("delete_chat", %{"id" => id}, socket) do
+    case Chats.delete_chat(id) do
+      {:ok, _chat} ->
+        {:noreply, socket |> put_flash(:info, "Chat deleted successfully")}
+      {:error, reason} ->
+        {:noreply, socket |> put_flash(:error, "Failed to delete chat: #{inspect(reason)}")}
+    end
+  end
 
 
   # Handle incoming AI token stream

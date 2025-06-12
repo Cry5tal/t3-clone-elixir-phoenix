@@ -36,22 +36,11 @@ defmodule T3CloneElixir.ChatServer do
   # Handle cast for generating AI response
   def handle_cast({:generate_response, chat_history}, state = %{chat_id: chat_id, buffer: _buffer}) do
     IO.inspect({chat_id, chat_history}, label: "[ChatServer] handle_cast :generate_response")
-    # Mock AI reply (for demo, just echo a canned string)
-    mock_reply = "This is a mock AI response streaming token by token.This is a mock AI response streaming token by token.This is a mock AI response streaming token by token.This is a mock AI response streaming token by token.This is a mock AI response streaming token by token.This is a mock AI response streaming token by token.This is a mock AI response streaming token by token.This is a mock AI response streaming token by token."
-    tokens = String.split(mock_reply, " ")
-    topic = "chat:#{chat_id}"
-    IO.inspect(topic, label: "[ChatServer] PubSub topic for streaming")
+    #topic = "chat:#{chat_id}"
 
-    # Spawn a task to simulate streaming
-    Task.start(fn ->
-      Enum.each(tokens, fn token ->
-        GenServer.cast(via_tuple(chat_id), {:buffer_token, token})
-        Phoenix.PubSub.broadcast(T3CloneElixir.PubSub, topic, {:ai_token, token})
-        Process.sleep(50)
-      end)
-      # DO NOT clear buffer here; let LiveView clear after DB save
-      Phoenix.PubSub.broadcast(T3CloneElixir.PubSub, topic, :done)
-    end)
+    # Start streaming completion using the abstraction module
+    # Tokens will be received as :openrouter_token messages in handle_info
+    T3CloneElixir.Completion.generate(chat_id, chat_history, self())
 
     {:noreply, %{state | buffer: ""}}
   end
@@ -66,10 +55,31 @@ defmodule T3CloneElixir.ChatServer do
       end
     {:noreply, %{state | buffer: new_buffer}}
   end
-
   def handle_cast(:clear_buffer, state) do
     {:noreply, %{state | buffer: ""}}
   end
+  # Handle incoming OpenRouter streaming tokens and events
+  def handle_info({:openrouter_token, content}, state = %{chat_id: chat_id, buffer: buffer}) do
+    topic = "chat:#{chat_id}"
+    # Content is already extracted from JSON by OpenrouterGenerator
+    GenServer.cast(self(), {:buffer_token, content})
+    Phoenix.PubSub.broadcast(T3CloneElixir.PubSub, topic, {:ai_token, content})
+    {:noreply, state}
+  end
+
+  def handle_info(:openrouter_stream_done, state = %{chat_id: chat_id}) do
+    topic = "chat:#{chat_id}"
+    Phoenix.PubSub.broadcast(T3CloneElixir.PubSub, topic, :done)
+    {:noreply, state}
+  end
+
+  def handle_info({:openrouter_error, reason}, state = %{chat_id: chat_id}) do
+    topic = "chat:#{chat_id}"
+    Phoenix.PubSub.broadcast(T3CloneElixir.PubSub, topic, {:ai_error, reason})
+    {:noreply, state}
+  end
+
+
 
   # Public API to clear buffer
   def clear_buffer(chat_id) do
