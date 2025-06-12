@@ -16,6 +16,10 @@ defmodule T3CloneElixir.Application do
       {Finch, name: T3CloneElixir.Finch},
       # Start a worker by calling: T3CloneElixir.Worker.start_link(arg)
       # {T3CloneElixir.Worker, arg},
+      # Start the Registry for per-chat servers
+      {Registry, keys: :unique, name: T3CloneElixir.ChatRegistry},
+      # Start the DynamicSupervisor for chat servers
+      T3CloneElixir.ChatSupervisor,
       # Start to serve requests, typically the last entry
       T3CloneElixirWeb.Endpoint
     ]

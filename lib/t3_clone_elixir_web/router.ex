@@ -99,6 +99,8 @@ defmodule T3CloneElixirWeb.Router do
 
 
       live "/chats", ChatLive.Home, :home
+      live "/chats/:uuid", ChatLive.Home, :show
+      live "/chats/:uuid/edit", ChatLive.Home, :edit
     end
   end
 

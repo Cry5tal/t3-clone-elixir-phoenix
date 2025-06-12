@@ -56,7 +56,7 @@ defmodule T3CloneElixir.Seeds do
 
     for {chat, _idx} <- Enum.with_index(chats) do
       slot_id = generate()
-      [model1, model2] = Enum.take_random(models, 2)
+      [model1, model2] = Enum.take_random(try, 2)
       for {who, content} <- Enum.take_random(markdown_examples, Enum.random(3..6)) do
         model_id = if who == "ai", do: model1.id, else: model2.id
         IO.inspect(model_id, label: "model_id for message")

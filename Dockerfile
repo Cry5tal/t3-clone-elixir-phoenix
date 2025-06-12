@@ -21,8 +21,13 @@ ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 FROM ${BUILDER_IMAGE} as builder
 
 # install build dependencies
-RUN apt-get update -y && apt-get install -y build-essential git \
-    && apt-get clean && rm -f /var/lib/apt/lists/*_*
+RUN apt-get update -y && apt-get install -y \
+  build-essential \
+  git \
+  curl \
+  && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+  && apt-get install -y nodejs \
+  && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # prepare build dir
 WORKDIR /app
@@ -48,11 +53,14 @@ RUN mix deps.compile
 COPY priv priv
 
 COPY lib lib
+# Copy and install JS deps first (caches better)
+COPY assets/package.json assets/package-lock.json ./assets/
+RUN cd assets && npm install
 
+# Copy the rest of assets and build them
 COPY assets assets
-
-# compile assets
 RUN mix assets.deploy
+
 
 # Compile the release
 RUN mix compile

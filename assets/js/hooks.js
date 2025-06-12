@@ -36,7 +36,31 @@ export const ChatInputAutoGrow = {
   }
 };
 
-// To use: import { ChatInputAutoGrow, ChatSendButton } from "./hooks" in app.js and register with LiveSocket
+// To use: import { ChatInputAutoGrow, ChatSendButton, ChatTokenStream } from "./hooks" in app.js and register with LiveSocket
+
+// Hook to incrementally render AI tokens in the chat area
+export const ChatTokenStream = {
+  mounted() {
+    // The element to append tokens to (should be set with phx-hook="ChatTokenStream")
+    this.buffer = "";
+    this.el.innerHTML = "";
+    this.handleEvent("ai_buffer_init", ({buffer}) => {
+      this.buffer = buffer;
+      this.el.textContent = buffer;
+    });
+    this.handleEvent("ai_token", ({token}) => {
+      if (this.buffer.length > 0) {
+        this.buffer += " " + token;
+      } else {
+        this.buffer = token;
+      }
+      this.el.textContent = this.buffer;
+    });
+    this.handleEvent("stream_done", () => {
+      this.el.classList.remove("animate-pulse");
+    });
+  }
+};
 
 // Disables send button if textarea is empty
 // Disables send button if textarea is empty. Adds debug logs and also checks on LiveView update.
