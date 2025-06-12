@@ -6,8 +6,18 @@ defmodule T3CloneElixirWeb.ChatLive.Home do
   @impl true
   def mount(_params, _session, socket) do
     user_id = socket.assigns.current_user.id
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(T3CloneElixir.PubSub, "chats:list")
+    end
     chats = Chats.get_chats_by_user_id(user_id)
-    {:ok, assign(socket, chats: chats, selected_chat_id: nil)}
+    {:ok, assign(socket, 
+      chats: chats, 
+      selected_chat_id: nil,
+      show_rename_modal: false,
+      show_delete_modal: false,
+      modal_chat_id: nil,
+      modal_chat_name: nil
+    )}
   end
 
   @impl true
@@ -88,26 +98,64 @@ defmodule T3CloneElixirWeb.ChatLive.Home do
   end
 
 
+  # Modal open/close handlers
+  def handle_event("open_rename_modal", %{"id" => id, "name" => name}, socket) do
+    {:noreply, assign(socket, show_rename_modal: true, show_delete_modal: false, modal_chat_id: id, modal_chat_name: name)}
+  end
+
+  def handle_event("open_delete_modal", %{"id" => id, "name" => name}, socket) do
+    {:noreply, assign(socket, show_delete_modal: true, show_rename_modal: false, modal_chat_id: id, modal_chat_name: name)}
+  end
+
+  def handle_event("close_modal", _params, socket) do
+    {:noreply, assign(socket, show_rename_modal: false, show_delete_modal: false, modal_chat_id: nil, modal_chat_name: nil)}
+  end
+
   def handle_event("rename_chat", %{"name" => name}, socket) do
-    chat_id = socket.assigns.selected_chat_id
-    case Chats.update_chat(chat_id, %{name: name}) do
+    chat_id = socket.assigns.modal_chat_id
+    chat = Chats.get_chat!(chat_id)
+    case Chats.update_chat(chat, %{name: name}) do
       {:ok, _chat} ->
-        {:noreply, socket |> put_flash(:info, "Chat renamed successfully")}
+        {:noreply,
+         socket
+         |> put_flash(:info, "Chat renamed successfully")
+         |> assign(show_rename_modal: false, modal_chat_id: nil, modal_chat_name: nil)}
       {:error, reason} ->
         {:noreply, socket |> put_flash(:error, "Failed to rename chat: #{inspect(reason)}")}
     end
   end
 
-
   def handle_event("delete_chat", %{"id" => id}, socket) do
-    case Chats.delete_chat(id) do
+    chat = Chats.get_chat!(id)
+    case Chats.delete_chat(chat) do
       {:ok, _chat} ->
-        {:noreply, socket |> put_flash(:info, "Chat deleted successfully")}
+        {:noreply, socket |> assign(show_delete_modal: false, modal_chat_id: nil, modal_chat_name: nil) |> put_flash(:info, "Chat deleted successfully")}
       {:error, reason} ->
         {:noreply, socket |> put_flash(:error, "Failed to delete chat: #{inspect(reason)}")}
     end
   end
+  # Fetch the chat struct before deleting, as delete_chat/1 expects %Chat{} not ID
 
+
+  # Handle PubSub updates for chat list
+  @impl true
+  def handle_info({:new_chat, chat}, socket) do
+    {:noreply, update(socket, :chats, fn chats -> [chat | chats] end)}
+  end
+
+  @impl true
+  def handle_info({:updated_chat, chat}, socket) do
+    {:noreply, update(socket, :chats, fn chats ->
+      Enum.map(chats, fn c -> if c.id == chat.id, do: chat, else: c end)
+    end)}
+  end
+
+  @impl true
+  def handle_info({:deleted_chat, chat}, socket) do
+    {:noreply, update(socket, :chats, fn chats ->
+      Enum.reject(chats, fn c -> c.id == chat.id end)
+    end)}
+  end
 
   # Handle incoming AI token stream
   @impl true

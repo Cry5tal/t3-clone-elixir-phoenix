@@ -69,9 +69,17 @@ defmodule T3CloneElixir.Chats do
 
   """
   def update_chat(%Chat{} = chat, attrs) do
-    chat
-    |> Chat.changeset(attrs)
-    |> Repo.update()
+    result =
+      chat
+      |> Chat.changeset(attrs)
+      |> Repo.update()
+    case result do
+      {:ok, updated_chat} ->
+        Phoenix.PubSub.broadcast(T3CloneElixir.PubSub, "chats:list", {:updated_chat, updated_chat})
+        {:ok, updated_chat}
+      error ->
+        error
+    end
   end
 
   @doc """
@@ -87,7 +95,14 @@ defmodule T3CloneElixir.Chats do
 
   """
   def delete_chat(%Chat{} = chat) do
-    Repo.delete(chat)
+    result = Repo.delete(chat)
+    case result do
+      {:ok, deleted_chat} ->
+        Phoenix.PubSub.broadcast(T3CloneElixir.PubSub, "chats:list", {:deleted_chat, deleted_chat})
+        {:ok, deleted_chat}
+      error ->
+        error
+    end
   end
 
   @doc """

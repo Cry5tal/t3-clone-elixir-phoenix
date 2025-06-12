@@ -23,12 +23,13 @@ import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import 'flowbite'
 
-import { ChatInputAutoGrow, ChatSendButton, ChatTokenStream } from "./hooks.js"
+
+import { ModalAnimation, ChatInputAutoGrow, ChatSendButton, ChatTokenStream } from "./hooks.js"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   params: {_csrf_token: csrfToken},
-  hooks: { ChatInputAutoGrow, ChatSendButton, ChatTokenStream }
+  hooks: { ModalAnimation, ChatInputAutoGrow, ChatSendButton, ChatTokenStream }
 })
 
 //wtf is that

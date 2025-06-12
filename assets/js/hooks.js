@@ -1,5 +1,57 @@
 // assets/js/hooks.js
 // Custom Phoenix LiveView hooks for the chat input
+import { gsap } from "gsap"
+// Modal animation hook with GSAP and outside click handling
+export const ModalAnimation = {
+  mounted() {
+    // Store references
+    this.modalOverlay = this.el;
+    this.modalContent = this.el.querySelector('.modal-content');
+    
+    if (!this.modalContent) {
+      console.error('Modal content element with class "modal-content" not found');
+      return;
+    }
+    
+    // Setup GSAP animations
+    this.showAnimation();
+    
+    // Handle outside click
+    this.handleOutsideClick = (e) => {
+      // If click is on the overlay (not on modal content)
+      if (e.target === this.modalOverlay) {
+        // Send close_modal event to LiveView
+        this.pushEvent('close_modal', {});
+      }
+    };
+    
+    // Add event listener
+    this.modalOverlay.addEventListener('click', this.handleOutsideClick);
+  },
+  
+  destroyed() {
+    // Clean up event listener when component is removed
+    if (this.modalOverlay && this.handleOutsideClick) {
+      this.modalOverlay.removeEventListener('click', this.handleOutsideClick);
+    }
+  },
+  
+  showAnimation() {
+    // Reset any previous animations
+    gsap.set(this.modalContent, { scale: 0.8, opacity: 0 });
+    
+    // Create animation timeline
+    const tl = gsap.timeline();
+    
+    // Animate modal content
+    tl.to(this.modalContent, {
+      duration: 0.3,
+      scale: 1,
+      opacity: 1,
+      ease: "back.out(1.7)"
+    });
+  }
+};
 
 export const ChatInputAutoGrow = {
   mounted() {
