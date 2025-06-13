@@ -24,12 +24,12 @@ import topbar from "../vendor/topbar"
 import 'flowbite'
 
 
-import { ModalAnimation, ChatInputAutoGrow, ChatSendButton, ChatTokenStream } from "./hooks.js"
+import { ModalAnimation, ChatInputAutoGrow, ChatSendButton, ChatTokenStream, ChatAutoScroll, DropdownMenuHook, ModelDropdownHook } from "./hooks.js"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   params: {_csrf_token: csrfToken},
-  hooks: { ModalAnimation, ChatInputAutoGrow, ChatSendButton, ChatTokenStream }
+  hooks: { ModalAnimation, ChatInputAutoGrow, ChatSendButton, ChatTokenStream, ChatAutoScroll, DropdownMenuHook, ModelDropdownHook }
 })
 
 //wtf is that

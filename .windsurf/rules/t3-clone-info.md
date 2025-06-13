@@ -64,28 +64,28 @@ Frontend: LiveView + JS-hooks, минимальный дизайн Tailwind CSS 
 9 июня (День 1):
 • Инициализация репозитория на GitHub, создание ветки main, базовый README (DONE)
 • Генерация проекта Phoenix LiveView с phx.gen.auth (DONE)
-• Подключение pythonx и пример «Hello world» скрипта (IN PROGRESS)
-• Написание базового Dockerfile (Elixir, Node.js, Python) (IN PROGRESS)
+• Подключение pythonx и пример «Hello world» скрипта (CANCELED)
+• Написание базового Dockerfile (Elixir, Node.js, Python) (DONE)
 • Настройка GitHub Actions: билд Docker → пуш в GitHub Packages (BACKLOGED)
 
 10 июня (День 2):
 • Абстракция LLM-провайдеров: модуль T3CloneElixir.ChatServer с паттерн-матчингом (DONE)
-• Реализация generate_completion через Pythonx для OpenRouter (IN PROGRESS
+• Реализация generate_completion через Pythonx для OpenRouter (IN PROGRESS)
 • Тестовый LiveView-endpoint: выбор провайдера, отправка промпта, отображение первого токена (IN PROGRESS)
 
 11 июня (День 3):
-• Полноценный стриминг токенов: фоновые Task → Pythonx → handle_info → push_event → JS-hook
+• Полноценный стриминг токенов: фоновые Task → Pythonx → handle_info → push_event → JS-hook (DONE)
 • Настройка JS-hook для аккумулирования токенов в DOM (DONE)
 • Тесты производительности (эмуляция 100–200 токенов/сек) (DONE)+-
 
 12 июня (День 4):
-• CRUD для чатов и сообщений (Ecto, Postgres) (IN PROGRESS)
-• UI: список чатов, создание, удаление, переключение между чатами
-• Выбор модели и провайдера при создании чата
+• CRUD для чатов и сообщений (Ecto, Postgres) (DONE)
+• UI: список чатов, создание, удаление, переключение между чатами (DONE)
+• Выбор модели и провайдера при создании чата (IN PROGRESS)
 
 13 июня (День 5):
-• Resumable streams: буферизация токенов в ETS, восстановление при reconnect
-• Сброс ETS-буфера и сохранение в БД по окончании стрима
+• Resumable streams: буферизация токенов в Genserver, восстановление при reconnect (DONE)
+• Сброс Genserver-буфера и сохранение в БД по окончании стрима (DONE)
 
 14 июня (День 6):
 • Быстрый доступ: ETS-кэш последних 20 чатов с 10 сообщениями
@@ -94,7 +94,7 @@ Frontend: LiveView + JS-hooks, минимальный дизайн Tailwind CSS 
 
 15 июня (День 7):
 • Markdown-рендеринг и подсветка кода: Earmark + raw, Highlight.js/Prism
-• Загрузка файлов: allow_upload, consume_uploaded_entries, чтение файлов в Pythonx
+• Загрузка файлов: allow_upload, consume_uploaded_entries
 
 16 июня (День 8):
 • Отладка и интеграционное тестирование фич

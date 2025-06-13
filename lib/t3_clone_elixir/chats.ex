@@ -198,9 +198,9 @@ defmodule T3CloneElixir.Chats do
     * {:ok, %{chat: chat, message: message}}
     * {:error, reason}
   """
-  def create_chat_with_message(user_id, message_content) do
+  def create_chat_with_message(user_id, message_content, selected_model_id) do
     Ecto.Multi.new()
-    |> Ecto.Multi.insert(:chat, Chat.changeset(%Chat{}, %{user_id: user_id, name: "new chat"}))
+    |> Ecto.Multi.insert(:chat, Chat.changeset(%Chat{}, %{user_id: user_id, name: "new chat", selected_model_id: selected_model_id}))
     |> Ecto.Multi.run(:message, fn _repo, %{chat: chat} ->
       message_attrs = %{
         chat_id: chat.id,

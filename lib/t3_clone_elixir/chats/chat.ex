@@ -6,6 +6,7 @@ defmodule T3CloneElixir.Chats.Chat do
   @derive {Phoenix.Param, key: :id}
   schema "chats" do
     field :name, :string
+    field :selected_model_id, :integer
     belongs_to :user, T3CloneElixir.Accounts.User
 
     timestamps(type: :utc_datetime)
@@ -14,7 +15,7 @@ defmodule T3CloneElixir.Chats.Chat do
   @doc false
   def changeset(chat, attrs) do
     chat
-    |> cast(attrs, [:user_id, :name])
-    |> validate_required([:user_id, :name])
+    |> cast(attrs, [:user_id, :name, :selected_model_id])
+    |> validate_required([:user_id, :name, :selected_model_id])
   end
 end
