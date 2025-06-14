@@ -22,7 +22,8 @@ defmodule T3CloneElixirWeb.ChatLive.Home do
       show_rename_modal: false,
       show_delete_modal: false,
       modal_chat_id: nil,
-      modal_chat_name: nil
+      modal_chat_name: nil,
+      ai_streaming_message: nil
     )}
   end
 
@@ -57,14 +58,9 @@ defmodule T3CloneElixirWeb.ChatLive.Home do
     socket = assign(socket,
       selected_chat_id: selected_chat_id,
       messages: messages,
-      selected_model: selected_model
+      selected_model: selected_model,
+      ai_streaming_message: (if ai_buffer != "", do: ai_buffer, else: nil)
     )
-    # Push buffer to JS if present
-    socket = if ai_buffer != "" do
-      push_event(socket, "ai_buffer_init", %{buffer: ai_buffer})
-    else
-      socket
-    end
     {:noreply, socket}
   end
 
@@ -150,7 +146,19 @@ defmodule T3CloneElixirWeb.ChatLive.Home do
     chat = Chats.get_chat!(id)
     case Chats.delete_chat(chat) do
       {:ok, _chat} ->
-        {:noreply, socket |> assign(show_delete_modal: false, modal_chat_id: nil, modal_chat_name: nil) |> put_flash(:info, "Chat deleted successfully")}
+        # If the deleted chat is currently open, redirect to /chats
+        if to_string(socket.assigns.selected_chat_id) == to_string(id) do
+          {:noreply,
+            socket
+            |> assign(show_delete_modal: false, modal_chat_id: nil, modal_chat_name: nil)
+            |> put_flash(:info, "Chat deleted successfully")
+            |> push_navigate(to: "/chats")}
+        else
+          {:noreply,
+            socket
+            |> assign(show_delete_modal: false, modal_chat_id: nil, modal_chat_name: nil)
+            |> put_flash(:info, "Chat deleted successfully")}
+        end
       {:error, reason} ->
         {:noreply, socket |> put_flash(:error, "Failed to delete chat: #{inspect(reason)}")}
     end
@@ -167,7 +175,9 @@ defmodule T3CloneElixirWeb.ChatLive.Home do
   @impl true
   def handle_info({:updated_chat, chat}, socket) do
     {:noreply, update(socket, :chats, fn chats ->
-      Enum.map(chats, fn c -> if c.id == chat.id, do: chat, else: c end)
+      chats
+      |> Enum.map(fn c -> if c.id == chat.id, do: chat, else: c end)
+      |> Enum.sort_by(& &1.updated_at, {:desc, DateTime})
     end)}
   end
 
@@ -200,8 +210,9 @@ defmodule T3CloneElixirWeb.ChatLive.Home do
   # Handle incoming AI token stream
   @impl true
   def handle_info({:ai_token, token}, socket) do
-    # Push each token to JS for incremental rendering
-    {:noreply, push_event(socket, "ai_token", %{token: token})}
+    # Append token to the streaming message buffer
+    current = socket.assigns.ai_streaming_message || ""
+    {:noreply, assign(socket, ai_streaming_message: current <> token)}
   end
 
   @impl true
@@ -219,13 +230,11 @@ defmodule T3CloneElixirWeb.ChatLive.Home do
     # Clear the buffer after saving
     T3CloneElixir.ChatServer.clear_buffer(chat_id)
 
-    # Update messages list
+    # Update messages list and clear streaming buffer
     messages = T3CloneElixir.Chats.get_chat_messages(chat_id, 10, 0)
-
-    # Notify JS that streaming is done and update assigns
     {:noreply,
       socket
-      |> assign(messages: messages)
+      |> assign(messages: messages, ai_streaming_message: nil)
       |> push_event("stream_done", %{})
     }
   end

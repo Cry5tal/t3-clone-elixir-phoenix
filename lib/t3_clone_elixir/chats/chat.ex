@@ -15,7 +15,7 @@ defmodule T3CloneElixir.Chats.Chat do
   @doc false
   def changeset(chat, attrs) do
     chat
-    |> cast(attrs, [:user_id, :name, :selected_model_id])
+    |> cast(attrs, [:user_id, :name, :selected_model_id, :updated_at])
     |> validate_required([:user_id, :name, :selected_model_id])
   end
 end

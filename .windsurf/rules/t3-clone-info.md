@@ -70,8 +70,8 @@ Frontend: LiveView + JS-hooks, минимальный дизайн Tailwind CSS 
 
 10 июня (День 2):
 • Абстракция LLM-провайдеров: модуль T3CloneElixir.ChatServer с паттерн-матчингом (DONE)
-• Реализация generate_completion через Pythonx для OpenRouter (IN PROGRESS)
-• Тестовый LiveView-endpoint: выбор провайдера, отправка промпта, отображение первого токена (IN PROGRESS)
+• Реализация generate_completion через OpenRouter (DONE)
+• Тестовый LiveView-endpoint: выбор провайдера, отправка промпта, отображение первого токена (DONE)
 
 11 июня (День 3):
 • Полноценный стриминг токенов: фоновые Task → Pythonx → handle_info → push_event → JS-hook (DONE)
@@ -81,7 +81,7 @@ Frontend: LiveView + JS-hooks, минимальный дизайн Tailwind CSS 
 12 июня (День 4):
 • CRUD для чатов и сообщений (Ecto, Postgres) (DONE)
 • UI: список чатов, создание, удаление, переключение между чатами (DONE)
-• Выбор модели и провайдера при создании чата (IN PROGRESS)
+• Выбор модели и провайдера при создании чата (DONE)
 
 13 июня (День 5):
 • Resumable streams: буферизация токенов в Genserver, восстановление при reconnect (DONE)
@@ -93,7 +93,7 @@ Frontend: LiveView + JS-hooks, минимальный дизайн Tailwind CSS 
 • Пагинация списка чатов (20 на стр.) и истории чата (50 сооб.)
 
 15 июня (День 7):
-• Markdown-рендеринг и подсветка кода: Earmark + raw, Highlight.js/Prism
+• Markdown-рендеринг и подсветка кода: Earmark + raw, Highlight.js/Prism (DONE)
 • Загрузка файлов: allow_upload, consume_uploaded_entries
 
 16 июня (День 8):

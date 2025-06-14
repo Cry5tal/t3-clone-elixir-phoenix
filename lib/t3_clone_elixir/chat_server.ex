@@ -57,7 +57,7 @@ defmodule T3CloneElixir.ChatServer do
       if state.buffer == "" do
         token
       else
-        state.buffer <> " " <> token
+        state.buffer <> "" <> token
       end
     {:noreply, %{state | buffer: new_buffer}}
   end

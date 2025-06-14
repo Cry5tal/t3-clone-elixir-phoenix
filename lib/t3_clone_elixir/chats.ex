@@ -224,28 +224,32 @@ defmodule T3CloneElixir.Chats do
 
 
 
-  @doc """
-Inserts a new message into an existing chat.
+    @doc """
+  Inserts a new message into an existing chat.
 
-## Parameters
-  * chat_id - The ID of the chat
-  * user_id - The ID of the user sending the message
-  * content - The message content
+  ## Parameters
+    * chat_id - The ID of the chat
+    * user_id - The ID of the user sending the message
+    * content - The message content
 
-## Returns
-  * {:ok, %Message{}}
-  * {:error, reason}
-"""
-def create_message(chat_id, user_id, content, who) do
-  message_attrs = %{
-    chat_id: chat_id,
-    user_id: user_id,
-    content: content,
-    who: who,
-    slot_id: Ecto.UUID.generate()
-  }
-  %T3CloneElixir.Messages.Message{}
-  |> T3CloneElixir.Messages.Message.changeset(message_attrs)
-  |> T3CloneElixir.Repo.insert()
-end
+  ## Returns
+    * {:ok, %Message{}}
+    * {:error, reason}
+  """
+  def create_message(chat_id, user_id, content, who) do
+    message_attrs = %{
+      chat_id: chat_id,
+      user_id: user_id,
+      content: content,
+      who: who,
+      slot_id: Ecto.UUID.generate()
+    }
+    %T3CloneElixir.Messages.Message{}
+    |> T3CloneElixir.Messages.Message.changeset(message_attrs)
+    |> T3CloneElixir.Repo.insert()
+
+    # updating chat's updated_at field
+    chat = get_chat!(chat_id)
+    update_chat(chat, %{updated_at: DateTime.utc_now()})
+  end
 end

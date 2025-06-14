@@ -56,6 +56,22 @@ export const MarkdownRenderer = {
   }
 };
 
+// CopyCode: LiveView hook for copy-to-clipboard on code blocks
+export const CopyCode = {
+  mounted() {
+    this.el.addEventListener('click', (e) => {
+      const code = this.el.closest('.code-card')?.querySelector('pre code');
+      if (code) {
+        navigator.clipboard.writeText(code.innerText).then(() => {
+          const original = this.el.innerHTML;
+          this.el.innerHTML = '<span style="color:#3D5A80">Copied!</span>';
+          setTimeout(() => { this.el.innerHTML = original; }, 1200);
+        });
+      }
+    });
+  }
+};
+
 // Add CSS for code blocks in ai-message
 const style = document.createElement('style');
 style.innerHTML = `
@@ -248,19 +264,48 @@ export const DropdownMenuHook = {
       this.trigger.removeEventListener('click', this.openHandler);
     }
     this.openHandler = (e) => {
-      console.log('[DropdownMenuHook] openHandler triggered', this.el, this.menu);
+      e.preventDefault();
       e.stopPropagation();
       if (this.menu.classList.contains('hidden')) {
+        // Save original parent and next sibling for restoration
+        if (!this._portalInfo) {
+          this._portalInfo = {
+            parent: this.menu.parentNode,
+            next: this.menu.nextSibling
+          };
+        }
+        // Move menu to body and make visible before measuring
+        document.body.appendChild(this.menu);
         this.menu.classList.remove('hidden');
+        // Wait one frame to ensure DOM update, then start positioning
+        const updateDropdownPosition = () => {
+          if (!this.menu || this.menu.classList.contains('hidden')) return;
+          const rect = this.trigger.getBoundingClientRect();
+          Object.assign(this.menu.style, {
+            position: 'absolute',
+            left: `${rect.right}px`,
+            top: `${rect.top + rect.height / 2 - this.menu.offsetHeight / 4}px`,
+            zIndex: 9999,
+          });
+          this._dropdownRAF = requestAnimationFrame(updateDropdownPosition);
+        };
+        requestAnimationFrame(updateDropdownPosition);
         gsap.fromTo(this.menu, { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: 0.18, ease: 'power2.out' });
-        // Defer attaching outside click handler to avoid immediate close
         setTimeout(() => {
           document.addEventListener('mousedown', this.outsideHandler);
         }, 0);
+        // Close dropdown on any button click inside menu
+        this._menuButtonHandler = (evt) => {
+          if (evt.target.closest('button')) {
+            this.closeMenu();
+          }
+        };
+        this.menu.addEventListener('click', this._menuButtonHandler);
       } else {
         this.closeMenu();
       }
     };
+
     this.outsideHandler = (e) => {
       if (!this.menu.contains(e.target) && !this.trigger.contains(e.target)) {
         this.closeMenu();
@@ -273,6 +318,34 @@ export const DropdownMenuHook = {
       gsap.to(this.menu, { opacity: 0, y: -8, duration: 0.13, onComplete: () => {
         this.menu.classList.add('hidden');
         gsap.set(this.menu, { clearProps: 'all' });
+        // --- PORTAL LOGIC END ---
+        // Remove button click handler
+        if (this._menuButtonHandler) {
+          this.menu.removeEventListener('click', this._menuButtonHandler);
+          this._menuButtonHandler = null;
+        }
+        // Stop position update loop
+        if (this._dropdownRAF) {
+          cancelAnimationFrame(this._dropdownRAF);
+          this._dropdownRAF = null;
+        }
+        // Restore menu to original parent
+        if (this._portalInfo) {
+          const { parent, next } = this._portalInfo;
+          if (parent && this.menu) {
+            if (next && next.parentNode === parent) {
+              parent.insertBefore(this.menu, next);
+            } else {
+              parent.appendChild(this.menu);
+            }
+          }
+          // Remove inline styles
+          this.menu.style.position = '';
+          this.menu.style.left = '';
+          this.menu.style.top = '';
+          this.menu.style.zIndex = '';
+          this._portalInfo = null;
+        }
       }});
       document.removeEventListener('mousedown', this.outsideHandler);
     }
