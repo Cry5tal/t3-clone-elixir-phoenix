@@ -1,6 +1,77 @@
 // assets/js/hooks.js
 // Custom Phoenix LiveView hooks for the chat input
 import { gsap } from "gsap"
+import MarkdownIt from "markdown-it";
+import markdownItKatex from "markdown-it-katex";
+import markdownItTaskLists from "markdown-it-task-lists";
+import markdownItFootnote from "markdown-it-footnote";
+import hljs from 'highlight.js/lib/core';
+import elixir from 'highlight.js/lib/languages/elixir';
+import javascript from 'highlight.js/lib/languages/javascript';
+import python from 'highlight.js/lib/languages/python';
+import 'highlight.js/styles/github.css';
+
+// Register languages you expect
+hljs.registerLanguage('elixir', elixir);
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('python', python);
+
+/**
+ * MarkdownRenderer: Renders markdown content inside the element using markdown-it.
+ * Usage: Add phx-hook="MarkdownRenderer" to any element whose innerText is markdown.
+ * Only use for trusted/escaped content (AI messages).
+ */
+export const MarkdownRenderer = {
+  mounted() {
+    this.md = new MarkdownIt({
+      html: false, // disable raw HTML for safety
+      linkify: true,
+      breaks: true
+    })
+      .use(markdownItKatex)
+      .use(markdownItTaskLists)
+      .use(markdownItFootnote);
+    this.renderMarkdown();
+    // Highlight code blocks on mount
+    this.highlightCodeBlocks();
+  },
+  updated() {
+    this.renderMarkdown();
+    // Highlight code blocks on update
+    this.highlightCodeBlocks();
+  },
+  renderMarkdown() {
+    // Get the raw text content (as sent from LiveView)
+    const raw = this.el.innerText;
+    // Render markdown to HTML
+    const html = this.md.render(raw);
+    // Set the HTML content (safe for markdown-it with html: false)
+    this.el.innerHTML = html;
+  },
+  highlightCodeBlocks() {
+    // Highlight all code blocks inside this element
+    this.el.querySelectorAll('pre code').forEach((block) => {
+      hljs.highlightElement(block);
+    });
+  }
+};
+
+// Add CSS for code blocks in ai-message
+const style = document.createElement('style');
+style.innerHTML = `
+.ai-message pre code {
+  display: block;
+  padding: 1em;
+  border-radius: 0.5em;
+  font-size: 0.95em;
+  background: #f6f8fa;
+  color: #24292f;
+  overflow-x: auto;
+}
+`;
+document.head.appendChild(style);
+
+
 // Modal animation hook with GSAP and outside click handling
 export const ModalAnimation = {
   mounted() {
@@ -136,7 +207,7 @@ export const ChatTokenStream = {
     });
     this.handleEvent("ai_token", ({token}) => {
       if (this.buffer.length > 0) {
-        this.buffer += " " + token;
+        this.buffer += "" + token;
       } else {
         this.buffer = token;
       }

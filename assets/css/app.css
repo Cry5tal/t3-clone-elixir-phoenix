@@ -3,3 +3,19 @@
 @import "tailwindcss/utilities";
 /* @import "flowbite"; */
 /* This file is for your main application CSS */
+
+/* Style markdown tables in AI messages */
+.ai-message table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+.ai-message th, .ai-message td {
+  border: 1px solid #e5e7eb; /* fallback for border-bg-300 */
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+.ai-message th {
+  background: #f3f4f6; /* fallback for bg-bg-200 */
+  font-weight: 600;
+}

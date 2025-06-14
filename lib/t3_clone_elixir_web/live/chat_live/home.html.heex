@@ -162,14 +162,15 @@
       <% else %>
         <%= for msg <- @messages do %>
           <div class={if msg.who == "user", do: "flex justify-end", else: "flex"}>
-            <div class={[
-              if(msg.who == "user",
-                do: "rounded-xl px-5 py-3 bg-bg-300 text-text-100 max-w-xl ml-8",
-                else: "rounded-xl px-6 py-4 bg-bg-100 text-text-100 max-w-2xl w-full"
-              )
-            ]}>
-              {msg.content}
-            </div>
+            <%= if msg.who in ["ai", "assistant"] do %>
+              <div id={"ai-msg-#{msg.id || @index}"} class="ai-message rounded-xl px-6 py-4 bg-bg-100 text-text-100 max-w-2xl w-full" phx-hook="MarkdownRenderer">
+                <%= Phoenix.HTML.raw(msg.content) %>
+              </div>
+            <% else %>
+              <div class="rounded-xl px-5 py-3 bg-bg-300 text-text-100 max-w-xl ml-8">
+                <%= msg.content %>
+              </div>
+            <% end %>
           </div>
         <% end %>
       <% end %>

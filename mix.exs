@@ -59,7 +59,7 @@ defmodule T3CloneElixir.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-      {:pythonx, "~> 0.4.4"}
+      {:mdex, "~> 0.6.0"}
 
     ]
   end
