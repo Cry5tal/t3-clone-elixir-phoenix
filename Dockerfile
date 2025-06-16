@@ -26,12 +26,12 @@ RUN apt-get update -y && apt-get install -y \
   git \
   curl \
   ca-certificates \
-  && curl https://sh.rustup.rs -sSf | bash -s -- -y \
   && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
   && apt-get install -y nodejs \
   && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
-# Add Rust to PATH
+# install rust BEFORE deps.get
+RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
 # Force mdex to compile NIF from source
@@ -47,7 +47,7 @@ RUN mix local.hex --force && \
 # set build ENV
 ENV MIX_ENV="prod"
 
-# install mix dependencies
+# install mix dependencies AFTER env + rust
 COPY mix.exs mix.lock ./
 RUN mix deps.get --only $MIX_ENV
 RUN mkdir config
