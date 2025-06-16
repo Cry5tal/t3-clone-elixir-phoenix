@@ -8,14 +8,17 @@ defmodule T3CloneElixirWeb.Live.ChatLive.HomeComponents.ChatMessages do
   """
   def render(assigns) do
     ~H"""
-    <div>
+    <div phx-hook="ChatScrollManager" id="chat-messages-container" style="overflow-y: auto; max-height: 70vh;">
       <%= if @messages == [] and is_nil(@streaming_message) do %>
         <div class="text-center text-text-300">No messages yet.</div>
       <% else %>
         <%= for msg <- @messages do %>
-          <div class={if msg.who == "user", do: "flex justify-end", else: "flex"}>
+          <div class={[
+            if(msg.who == "user", do: "flex justify-end", else: "flex"),
+            "group relative"
+          ]}>
             <%= if msg.who in ["ai", "assistant"] do %>
-              <div id={"ai-msg-#{msg.id || @index}"} class="ai-message rounded-xl px-6 py-4 bg-bg-100 text-text-100 max-w-2xl w-full">
+              <div id={"ai-msg-#{msg.id || @index}"} class="ai-message rounded-xl px-6 py-4 bg-bg-100 text-text-100 max-w-2xl w-full relative">
                 <%= for block <- parse_code_blocks(msg.content) do %>
                   <%= if is_map(block) and block.type == :code do %>
                     <div class="code-card bg-bg-200 border border-bg-300 rounded-xl mb-4 mt-4 overflow-hidden">
@@ -37,10 +40,40 @@ defmodule T3CloneElixirWeb.Live.ChatLive.HomeComponents.ChatMessages do
                     <%= Phoenix.HTML.raw(format_markdown(block)) %>
                   <% end %>
                 <% end %>
+                <!-- AI Copy & Regenerate controls at bottom left below bubble -->
+                <div class="flex items-center gap-1 mt-2 ml-1">
+                  <button type="button"
+                    id={"copy-ai-btn-#{msg.id}"}
+                    class="text-text-200 hover:text-accent-100 focus:outline-none"
+                    title="Copy message"
+                    phx-hook="CopyMessage"
+                    data-message-id={msg.id}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2" stroke="currentColor" fill="none"/>
+                      <rect x="3" y="3" width="13" height="13" rx="2" stroke-width="2" stroke="currentColor" fill="none"/>
+                    </svg>
+                  </button>
+
+                </div>
               </div>
             <% else %>
-              <div class="rounded-xl px-5 py-3 bg-bg-300 text-text-100 max-w-xl ml-8">
+              <div class="rounded-xl px-5 py-3 bg-bg-300 text-text-100 max-w-xl ml-8 relative">
                 <%= msg.content %>
+                <!-- User copy button absolutely positioned below and left of the bubble -->
+                <!-- <button type="button"
+                  id={"copy-msg-btn-#{msg.id}"}
+                  class="absolute left-2 bottom-2 text-text-200 hover:text-accent-100 focus:outline-none"
+                  title="Copy message"
+                  phx-hook="CopyMessage"
+                  data-message-id={msg.id}
+                >
+                  <!-- Copy icon
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2" stroke="currentColor" fill="none"/>
+                    <rect x="3" y="3" width="13" height="13" rx="2" stroke-width="2" stroke="currentColor" fill="none"/>
+                  </svg>
+                </button>-->
               </div>
             <% end %>
           </div>
@@ -81,8 +114,8 @@ defmodule T3CloneElixirWeb.Live.ChatLive.HomeComponents.ChatMessages do
   # Returns a list of either strings (markdown text) or maps (%{type: :code, language: lang, code: code})
   defp parse_code_blocks(nil), do: []
   defp parse_code_blocks(text) when is_binary(text) do
-    # Regex to match code blocks: ```lang\n...code...\n```
-    regex = ~r/```([a-zA-Z0-9_+-]*)\n([\s\S]*?)```/m
+    # Regex to match code blocks: ```lang\n...code...\n``` (handles leading spaces/tabs/symbols before closing ```)
+    regex = ~r/```([a-zA-Z0-9_+-]*)\n([\s\S]*?)(?:^[ \t\p{P}]*```)/m
     do_parse_code_blocks(text, regex, [])
   end
 

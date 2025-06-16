@@ -1,60 +1,7 @@
 // assets/js/hooks.js
 // Custom Phoenix LiveView hooks for the chat input
 import { gsap } from "gsap"
-import MarkdownIt from "markdown-it";
-import markdownItKatex from "markdown-it-katex";
-import markdownItTaskLists from "markdown-it-task-lists";
-import markdownItFootnote from "markdown-it-footnote";
-import hljs from 'highlight.js/lib/core';
-import elixir from 'highlight.js/lib/languages/elixir';
-import javascript from 'highlight.js/lib/languages/javascript';
-import python from 'highlight.js/lib/languages/python';
 import 'highlight.js/styles/github.css';
-
-// Register languages you expect
-hljs.registerLanguage('elixir', elixir);
-hljs.registerLanguage('javascript', javascript);
-hljs.registerLanguage('python', python);
-
-/**
- * MarkdownRenderer: Renders markdown content inside the element using markdown-it.
- * Usage: Add phx-hook="MarkdownRenderer" to any element whose innerText is markdown.
- * Only use for trusted/escaped content (AI messages).
- */
-export const MarkdownRenderer = {
-  mounted() {
-    this.md = new MarkdownIt({
-      html: false, // disable raw HTML for safety
-      linkify: true,
-      breaks: true
-    })
-      .use(markdownItKatex)
-      .use(markdownItTaskLists)
-      .use(markdownItFootnote);
-    this.renderMarkdown();
-    // Highlight code blocks on mount
-    this.highlightCodeBlocks();
-  },
-  updated() {
-    this.renderMarkdown();
-    // Highlight code blocks on update
-    this.highlightCodeBlocks();
-  },
-  renderMarkdown() {
-    // Get the raw text content (as sent from LiveView)
-    const raw = this.el.innerText;
-    // Render markdown to HTML
-    const html = this.md.render(raw);
-    // Set the HTML content (safe for markdown-it with html: false)
-    this.el.innerHTML = html;
-  },
-  highlightCodeBlocks() {
-    // Highlight all code blocks inside this element
-    this.el.querySelectorAll('pre code').forEach((block) => {
-      hljs.highlightElement(block);
-    });
-  }
-};
 
 // CopyCode: LiveView hook for copy-to-clipboard on code blocks
 export const CopyCode = {
@@ -71,6 +18,63 @@ export const CopyCode = {
     });
   }
 };
+
+// ChatInfiniteScroll: Infinite scroll for chat messages (pagination)
+export const ChatInfiniteScroll = {
+  mounted() {
+    this.loading = false;
+    this.handleScroll = async (e) => {
+      // Only trigger if at top and not already loading
+      if (this.el.scrollTop === 0 && !this.loading) {
+        this.loading = true;
+        // Save current scroll height to restore position after prepend
+        const prevHeight = this.el.scrollHeight;
+        this.pushEvent("load_more_messages", {}, {
+          // After LiveView patch, restore scroll position to just below the newly loaded messages
+          onReply: () => {
+            // Wait for DOM update
+            setTimeout(() => {
+              const newHeight = this.el.scrollHeight;
+              this.el.scrollTop = newHeight - prevHeight;
+              this.loading = false;
+            }, 60);
+          }
+        });
+      }
+    };
+    this.el.addEventListener('scroll', this.handleScroll);
+  },
+  destroyed() {
+    this.el.removeEventListener('scroll', this.handleScroll);
+  }
+};
+
+// CopyMessage: LiveView hook for copy-to-clipboard on message bubbles
+export const CopyMessage = {
+  mounted() {
+    this.el.addEventListener('click', (e) => {
+      // Find the closest message bubble (ai or user)
+      let bubble = this.el.closest('.ai-message') || this.el.closest('.rounded-xl');
+      if (!bubble) return;
+      // Try to get the text content only (excluding button icons)
+      // Remove all buttons temporarily to avoid copying their text
+      let buttons = bubble.querySelectorAll('button');
+      buttons.forEach(btn => btn.style.display = 'none');
+      // Get the visible text
+      let text = bubble.innerText.trim();
+      // Restore buttons
+      buttons.forEach(btn => btn.style.display = '');
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => {
+        // Swap icon to feedback
+        const original = this.el.innerHTML;
+        this.el.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+        setTimeout(() => { this.el.innerHTML = original; }, 1200);
+      });
+    });
+  }
+};
+
 
 // Add CSS for code blocks in ai-message
 const style = document.createElement('style');
@@ -140,21 +144,29 @@ export const ModalAnimation = {
   }
 };
 
+// ChatInputAutoGrow: Handles auto-growing textarea and Enter/Shift+Enter logic for chat input
 export const ChatInputAutoGrow = {
   mounted() {
-    const textarea = this.el.querySelector("textarea");
-    if (!textarea) return;
-    // Set initial height
+    console.log('[ChatInputAutoGrow] mounted, this.el:', this.el);
+    // If hook is attached directly to the textarea, use this.el
+    const textarea = this.el;
+    if (!textarea) {
+      console.warn('[ChatInputAutoGrow] No textarea found!');
+      return;
+    }
+    console.log('[ChatInputAutoGrow] Found textarea:', textarea);
+
+    // Set up to grow up to 10 lines
+    const maxRows = 10;
     textarea.style.height = "auto";
     textarea.style.overflowY = "hidden";
-    const maxRows = 4;
+
+    // Dynamically update height up to 10 lines, then scroll
     const updateHeight = () => {
       textarea.style.height = "auto";
-      let lines = textarea.value.split("\n").length;
-      let scrollHeight = textarea.scrollHeight;
-      // Limit height to maxRows
-      let lineHeight = parseInt(getComputedStyle(textarea).lineHeight) || 24;
-      let maxHeight = lineHeight * maxRows;
+      const lineHeight = parseInt(getComputedStyle(textarea).lineHeight) || 24;
+      const maxHeight = lineHeight * maxRows;
+      const scrollHeight = textarea.scrollHeight;
       if (scrollHeight > maxHeight) {
         textarea.style.height = maxHeight + "px";
         textarea.style.overflowY = "auto";
@@ -162,53 +174,102 @@ export const ChatInputAutoGrow = {
         textarea.style.height = scrollHeight + "px";
         textarea.style.overflowY = "hidden";
       }
+      console.log('[ChatInputAutoGrow] updateHeight fired. Height:', textarea.style.height, 'Rows:', textarea.value.split('\n').length);
     };
-    textarea.addEventListener("input", updateHeight);
-    // Allow Shift+Enter for new lines
+
+    textarea.addEventListener("input", (e) => {
+      console.log('[ChatInputAutoGrow] input event:', e);
+      updateHeight();
+    });
+
+    // Handle Enter/Shift+Enter logic
     textarea.addEventListener("keydown", function(e) {
+      console.log('[ChatInputAutoGrow] keydown:', e.key, 'shift?', e.shiftKey);
       if (e.key === "Enter" && !e.shiftKey) {
-        // Let LiveView handle submit
-        // Do not preventDefault
+        if (!textarea.value.trim()) {
+          console.log('[ChatInputAutoGrow] Prevent submit: textarea empty');
+          e.preventDefault();
+          return false;
+        }
+        // Manually submit the form
+        const form = textarea.closest("form");
+        if (form) {
+          e.preventDefault(); // Prevent newline
+          form.requestSubmit ? form.requestSubmit() : form.submit();
+          setTimeout(() => textarea.blur(), 0);
+          console.log('[ChatInputAutoGrow] Enter pressed, form submitted');
+        }
+      } else if (e.key === "Enter" && e.shiftKey) {
+        console.log('[ChatInputAutoGrow] Shift+Enter: allow new line');
       }
     });
+
+    // Reset height on form submit for UX polish
+    const form = textarea.closest("form");
+    if (form) {
+      form.addEventListener("submit", () => {
+        console.log('[ChatInputAutoGrow] Form submitted, resetting textarea');
+        setTimeout(() => {
+          textarea.value = "";
+          textarea.style.height = "auto";
+          textarea.style.overflowY = "hidden";
+        }, 10);
+      });
+    } else {
+      console.warn('[ChatInputAutoGrow] No parent form found!');
+    }
+
+    // Initial height
     updateHeight();
   }
 };
 
 // To use: import { ModalAnimation, ChatInputAutoGrow, ChatSendButton, ChatTokenStream, ChatAutoScroll, DropdownMenuHook, ModelDropdownHook } from "./hooks.js" in app.js and register with LiveSocket
 
-// ChatAutoScroll: Ensures chat area always scrolls to bottom on mount, update, and new content
-export const ChatAutoScroll = {
+// ChatScrollManager: Infinite scroll + sticky auto-scroll for chat UX
+export const ChatScrollManager = {
   mounted() {
-    this.scrollTarget = document.getElementById("chat-messages") || this.el;
+    this.loading = false;
+    this.stickToBottom = true; // true if user is at/near bottom
+    this.scrollThreshold = 80; // px from bottom considered "at bottom"
+    this.handleScroll = (e) => {
+      // Infinite scroll: load more if at top
+      if (this.el.scrollTop === 0 && !this.loading) {
+        this.loading = true;
+        const prevHeight = this.el.scrollHeight;
+        this.pushEvent("load_more_messages", {}, {
+          onReply: () => {
+            setTimeout(() => {
+              const newHeight = this.el.scrollHeight;
+              this.el.scrollTop = newHeight - prevHeight;
+              this.loading = false;
+            }, 60);
+          }
+        });
+      }
+      // Sticky scroll: track if user is at/near bottom
+      const distanceFromBottom = this.el.scrollHeight - this.el.scrollTop - this.el.clientHeight;
+      this.stickToBottom = distanceFromBottom < this.scrollThreshold;
+    };
+    this.el.addEventListener('scroll', this.handleScroll);
+    // Initial scroll to bottom
     this.scrollToBottom();
-    // Observe for new messages or DOM changes
-    this.observer = new MutationObserver(() => {
-      // Use requestAnimationFrame to ensure DOM is updated before scrolling
-      requestAnimationFrame(() => this.scrollToBottom());
-    });
-    this.observer.observe(this.scrollTarget, { childList: true, subtree: true });
-    window.addEventListener("resize", this.scrollToBottom.bind(this));
   },
   updated() {
-    this.scrollToBottom();
+    // Only auto-scroll if user is at/near bottom
+    if (this.stickToBottom) {
+      this.scrollToBottom();
+    }
   },
   destroyed() {
-    if (this.observer) this.observer.disconnect();
-    window.removeEventListener("resize", this.scrollToBottom.bind(this));
+    this.el.removeEventListener('scroll', this.handleScroll);
   },
   scrollToBottom() {
-    // Prefer explicit scroll target by id, fallback to this.el
-    const el = document.getElementById("chat-messages") || this.el;
-    if (!el) {
-      return;
-    }
-    el.scrollTop = el.scrollHeight;
-    // After scrolling, log the new scrollTop
-    setTimeout(() => {
-    }, 50);
+    this.el.scrollTop = this.el.scrollHeight;
   }
 };
+
+// (removed old ChatAutoScroll and ChatInfiniteScroll hooks)
 
 
 // Hook to incrementally render AI tokens in the chat area
@@ -242,15 +303,12 @@ export const ChatTokenStream = {
 // Disables send button if textarea is empty. Adds debug logs and also checks on LiveView update.
 export const DropdownMenuHook = {
   mounted() {
-    console.log('[DropdownMenuHook] mounted', this.el);
     this.init();
   },
   updated() {
-    console.log('[DropdownMenuHook] updated', this.el);
     this.init();
   },
   destroyed() {
-    console.log('[DropdownMenuHook] destroyed', this.el);
     this.removeHandlers();
   },
   init() {
@@ -360,15 +418,12 @@ export const DropdownMenuHook = {
 // Dropdown hook for model selector
 export const ModelDropdownHook = {
   mounted() {
-    console.log('[ModelDropdownHook] mounted', this.el);
     this.init();
   },
   updated() {
-    console.log('[ModelDropdownHook] updated', this.el);
     this.init();
   },
   destroyed() {
-    console.log('[ModelDropdownHook] destroyed', this.el);
     this.removeHandlers();
   },
   init() {
@@ -387,7 +442,6 @@ export const ModelDropdownHook = {
     }
   
     this.openHandler = (e) => {
-      console.log('[ModelDropdownHook] openHandler triggered', this.el, this.menu);
       e.stopPropagation();
       if (this.menu.classList.contains('hidden')) {
         // Open dropdown
@@ -438,26 +492,38 @@ export const ModelDropdownHook = {
     this._handlerAttached = false;
   }
 };
-// AI GENERATED SLOP. DONT KNOW HOW IT WORKS
+// ChatSendButton: Handles send/cancel button UI for streaming state
 export const ChatSendButton = {
   mounted() {
-    const textarea = this.el.querySelector("textarea");
-    const sendBtn = this.el.querySelector("#chat-send-btn");
-    if (!textarea || !sendBtn) return;
-    const check = () => {
-      sendBtn.disabled = textarea.value.trim().length === 0;
-    };
-    textarea.addEventListener("input", check);
-    check();
+    this.setup();
   },
   updated() {
-    // Re-run check in case LiveView re-renders the form
+    this.setup();
+  },
+  setup() {
+    // Always re-query elements
     const textarea = this.el.querySelector("textarea");
     const sendBtn = this.el.querySelector("#chat-send-btn");
     if (!textarea || !sendBtn) return;
+
+    // Remove previous input listener if present
+    if (this._inputListener) {
+      textarea.removeEventListener("input", this._inputListener);
+    }
+
+    // Enable/disable logic
     const check = () => {
-      sendBtn.disabled = textarea.value.trim().length === 0;
+      if (sendBtn.getAttribute("data-streaming") !== "true") {
+        sendBtn.disabled = textarea.value.trim().length === 0;
+      } else {
+        sendBtn.disabled = false;
+      }
     };
+
+    this._inputListener = check;
+    textarea.addEventListener("input", check);
+
+    // Initial state
     check();
   }
 };

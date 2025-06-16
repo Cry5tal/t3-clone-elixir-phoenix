@@ -18,7 +18,7 @@ defmodule T3CloneElixir.OpenrouterGenerator do
   def stream_chat_completion(messages, model \\ @default_model, receiver, is_stream \\ true) do
     api_key = Application.get_env(:t3_clone_elixir, :openrouter_api_key)
     IO.inspect(api_key, label: "[OpenrouterGenerator] api_key")
-    spawn_link(fn ->
+    spawn(fn ->
       headers = [
         {"Authorization", "Bearer #{api_key}"},
         {"Content-Type", "application/json"},
@@ -146,10 +146,5 @@ defmodule T3CloneElixir.OpenrouterGenerator do
     end)
   end
 
-  # Backwards compatibility: single prompt string
-  # def stream_chat_completion(prompt, model, receiver) when is_binary(prompt) do
-  #   messages = [%{"role" => "user", "content" => prompt}]
-  #   stream_chat_completion(messages, model, receiver)
-  # end
 
 end

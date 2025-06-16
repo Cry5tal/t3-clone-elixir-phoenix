@@ -9,8 +9,8 @@ defmodule T3CloneElixir.ChatServer do
   defp via_tuple(chat_id), do: {:via, Registry, {T3CloneElixir.ChatRegistry, chat_id}}
 
   def init(chat_id) do
-    # Initialize buffer as empty string
-    {:ok, %{chat_id: chat_id, buffer: ""}}
+    # Initialize buffer as empty string, and stream_pid as nil
+    {:ok, %{chat_id: chat_id, buffer: "", stream_pid: nil}}
   end
 
   # Public API to trigger AI response generation for a chat
@@ -40,15 +40,17 @@ defmodule T3CloneElixir.ChatServer do
   # Handle cast for generating AI response (with model_name)
   def handle_cast({:generate_response, chat_history, model_name}, state = %{chat_id: chat_id, buffer: _buffer}) do
     IO.inspect({chat_id, chat_history, model_name}, label: "[ChatServer] handle_cast :generate_response/3")
-    T3CloneElixir.Completion.generate(chat_id, chat_history, self(), model_name)
-    {:noreply, %{state | buffer: ""}}
+    # Call Completion.generate directly, which returns the streaming process PID
+    stream_pid = T3CloneElixir.Completion.generate(chat_id, chat_history, self(), model_name)
+    {:noreply, %{state | buffer: "", stream_pid: stream_pid}}
   end
 
   # Backwards compatibility for old calls
   def handle_cast({:generate_response, chat_history}, state = %{chat_id: chat_id, buffer: _buffer}) do
     IO.inspect({chat_id, chat_history}, label: "[ChatServer] handle_cast :generate_response")
-    T3CloneElixir.Completion.generate(chat_id, chat_history, self(), "openai/gpt-4o")
-    {:noreply, %{state | buffer: ""}}
+    # Call Completion.generate directly, which returns the streaming process PID
+    stream_pid = T3CloneElixir.Completion.generate(chat_id, chat_history, self(), "openai/gpt-4o")
+    {:noreply, %{state | buffer: "", stream_pid: stream_pid}}
   end
 
   # Handle appending tokens to buffer
@@ -131,6 +133,17 @@ defmodule T3CloneElixir.ChatServer do
 
 
 
+  # Public API to cancel the AI stream for a chat
+  # This sends a :cancel_stream message to the GenServer, which will broadcast :done and clear buffer
+  def cancel_stream(chat_id) do
+    case Registry.lookup(T3CloneElixir.ChatRegistry, chat_id) do
+      [{pid, _}] ->
+        GenServer.cast(pid, :cancel_stream)
+      [] ->
+        :ok
+    end
+  end
+
   # Public API to clear buffer
   def clear_buffer(chat_id) do
     case Registry.lookup(T3CloneElixir.ChatRegistry, chat_id) do
@@ -139,6 +152,15 @@ defmodule T3CloneElixir.ChatServer do
       [] ->
         :ok
     end
+  end
+
+  # Handle cancel_stream cast in GenServer
+  def handle_cast(:cancel_stream, state = %{stream_pid: stream_pid}) do
+    # Kill streaming task if alive
+    if is_pid(stream_pid) and Process.alive?(stream_pid), do: Process.exit(stream_pid, :kill)
+    # Notify ourselves to run the normal stream-done logic
+    send(self(), :openrouter_stream_done)
+    {:noreply, %{state | stream_pid: nil}}
   end
 
   # Public API to get current buffer

@@ -2,11 +2,6 @@
   "dependencies": {
     "flowbite": "^3.1.2",
     "gsap": "^3.13.0",
-    "highlight.js": "^11.11.1",
-    "katex": "^0.16.22",
-    "markdown-it": "^14.1.0",
-    "markdown-it-footnote": "^4.0.0",
-    "markdown-it-katex": "^2.0.3",
-    "markdown-it-task-lists": "^2.1.1"
+    "katex": "^0.16.22"
   }
 }

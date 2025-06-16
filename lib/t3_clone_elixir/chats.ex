@@ -159,7 +159,7 @@ defmodule T3CloneElixir.Chats do
   def get_chat_messages(chat_id, limit \\ 10, offset \\ 0) do
     from(m in T3CloneElixir.Messages.Message,
       where: m.chat_id == ^chat_id,
-      order_by: [asc: m.inserted_at],
+      order_by: [desc: m.inserted_at],
       limit: ^limit,
       offset: ^offset
     )
