@@ -82,8 +82,8 @@ defmodule T3CloneElixirWeb.ChatLive.HomeComponents.Sidebar do
     ~H"""
     <li class="relative">
       <div class="flex items-center">
-        <a
-          href={"/chats/#{@chat.id}"}
+        <.link
+          patch={"/chats/#{@chat.id}"}
           class={[
             "flex-1 flex items-center px-3 py-2 rounded-lg transition relative overflow-hidden",
             if(@selected_chat_id == to_string(@chat.id),
@@ -113,7 +113,7 @@ defmodule T3CloneElixirWeb.ChatLive.HomeComponents.Sidebar do
               <circle cx="12" cy="19" r="1.5" />
             </svg>
           </button>
-        </a>
+        </.link>
         <!-- Flowbite Dropdown Menu -->
         <div
           id={"dropdownDots-#{@chat.id}"}

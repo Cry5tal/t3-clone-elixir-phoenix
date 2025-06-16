@@ -6,156 +6,19 @@
 />
 
 <div class="sm:ml-64 h-[calc(100vh-0.5rem)] flex flex-col">
-  <!-- Centered chat wrapper for messages and input, with responsive max width and horizontal padding -->
-  <div class="flex flex-col flex-1 h-full bg-bg-100 max-w-3xl w-full mx-auto px-4 lg:px-0">
-    
-<!-- Chat messages area -->
-    <div id="chat-messages" class="flex-1 overflow-y-auto p-4 lg:p-8 space-y-3 lg:space-y-2" phx-hook="ChatAutoScroll">
-      <.live_component 
-        module={T3CloneElixirWeb.Live.ChatLive.HomeComponents.ChatMessages} 
-        id="chat-messages-list" 
-        messages={@messages} 
-        streaming_message={@ai_streaming_message} 
-        models={@models}
-      />
-      <!-- Extra space below messages to prevent overlap with chat input -->
-      <div class="h-12 lg:h-20"></div>
-    </div>
-    <!-- Input area -->
 
-      <!-- Sticky input area at the bottom, width synced with chat area -->
-    <div class="sticky bottom-0 z-20 bg-bg-100 pt-2 pb-2">
-      <form
-        id="chat-input-form"
-        class="w-full max-w-2xl mx-auto"
-        phx-hook="ChatSendButton"
-        phx-submit="send_message"
-      >
-        <!-- Hidden input to submit selected model id -->
-        <input type="hidden" name="model_id" value={@selected_model && @selected_model.id} />
-        <div class="flex flex-col w-full bg-bg-300 rounded-2xl px-4 py-3 shadow-inner gap-2 relative">
-          <textarea
-            id="chat-input-textarea"
-            name="content"
-            phx-hook="ChatInputAutoGrow"
-            rows="1"
-            maxlength="1000"
-            placeholder="Type your message..."
-            class="resize-none bg-transparent text-text-100 px-2 py-2 pr-12 focus:outline-none focus:ring-0 border-none min-h-[40px] max-h-[144px] overflow-y-auto rounded-md"
-            style="line-height: 1.5;"
-          ></textarea>
-          <div class="flex items-end gap-2 relative min-h-[3.25rem]">
-            <!-- Model Dropdown (bottom left) -->
-            <div class="relative">
-              <button
-                id="modelDropdownButton"
-                phx-hook="ModelDropdownHook"
-                type="button"
-                class="rounded-full bg-bg-200 text-text-100 px-3 py-2 text-sm flex items-center focus:outline-none focus:ring-2 focus:ring-brand border-none"
-              >
-                <%= @selected_model && @selected_model.name || @models |> List.first() |> Map.get(:name, "Select Model") %>
-                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 15l-7-7-7 7" /> <!-- Up arrow -->
-                </svg>
-              </button>
-              <!-- Dropdown Menu -->
-              <div
-                id="modelDropdownMenu"
-                class="z-20 hidden bg-bg-200 divide-y divide-bg-300 border-[1px] border-bg-300 rounded-lg shadow-sm w-44 absolute left-0 bottom-full mb-2"
-                style="min-width: 10rem;"
-              >
-                <ul class="py-2 text-sm text-text-100 max-h-60" aria-labelledby="modelDropdownButton">
-                  <%= for model <- @models do %>
-                    <li>
-                      <button
-                        type="button"
-                        class={"w-full text-left flex items-center px-4 py-2 hover:bg-bg-300 rounded transition " <> (if @selected_model && @selected_model.id == model.id, do: "bg-accent-100 font-semibold", else: "")}
-                        phx-click="select_model"
-                        phx-value-id={model.id}
-                        aria-selected={@selected_model && @selected_model.id == model.id}
-                        role="option"
-                      >
-                        <!-- Show checkmark if selected -->
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style={if @selected_model && @selected_model.id == model.id, do: "", else: "visibility:hidden;position:absolute;"}>
-                          <circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="2" fill="none" />
-                          <circle cx="12" cy="12" r="3" fill="currentColor" />
-                        </svg>
-                        {model.name}
-                      </button>
-                    </li>
-                  <% end %>
-                </ul>
-              </div>
-            </div>
-            <!-- File Attach Button (next to dropdown) -->
-            <div class="relative ml-2">
-              <button
-                type="button"
-                class="rounded-full bg-bg-200 text-text-100 p-2 hover:bg-accent-100 focus:outline-none"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15.172 7l-6.586 6.586a2 2 0 002.828 2.828l7.071-7.071a4 4 0 00-5.657-5.657l-8.485 8.485a6 6 0 108.485 8.485L19 13"
-                  />
-                </svg>
-              </button>
-              <!-- Attach dropdown menu mock -->
-              <div class="hidden absolute left-0 mt-2 w-40 rounded-md shadow-lg bg-bg-200 ring-1 ring-black ring-opacity-5 z-10">
-                <div class="py-1 text-text-100">
-                  <a href="#" class="block px-4 py-2 hover:bg-bg-300 rounded">Upload file</a>
-                  <a href="#" class="block px-4 py-2 hover:bg-bg-300 rounded">
-                    From Google Drive
-                  </a>
-                </div>
-              </div>
-            </div>
-            <!-- Textarea expands to fill -->
-            <!-- Send Button, right bottom corner -->
-            <!-- Send/Cancel Button: shows square (stop) icon when streaming, arrow otherwise -->
-            <%= if @is_waiting_for_stream or @ai_streaming_message do %>
-  <!-- Streaming or waiting: show a dedicated cancel button (not submitting the form) -->
-  <!-- Stop/Cancel AI streaming button triggers cancel_stream event -->
-  <button
-    id="chat-cancel-btn"
-    type="button"
-    phx-click="cancel_stream"
-    class="ml-auto mr-2 self-end rounded-full bg-red-500 text-white p-2 hover:bg-red-700 focus:outline-none transition flex items-center justify-center"
-    phx-hook="CancelButton"
-    aria-label="Cancel streaming"
-  >
-    <!-- Square (stop) icon for cancel -->
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <rect x="6" y="6" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2" fill="currentColor" />
-    </svg>
-  </button>
-<% else %>
-  <!-- Not streaming: show the regular send button -->
-  <button
-    id="chat-send-btn"
-    type="submit"
-    class="ml-auto mr-2 self-end rounded-full bg-bg-200 text-text-100 p-2 hover:bg-accent-100 focus:outline-none disabled:opacity-50 transition flex items-center justify-center disabled:hover:bg-bg-200 disabled:cursor-not-allowed"
-    aria-label="Send message"
-    phx-hook="ChatSendButton"
-  >
-    <!-- Arrow (send) icon -->
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l6 6m-6-6l-6 6" />
-    </svg>
-  </button>
-<% end %>
-          </div>
-            </div>
-        </form>
-      </div>
-    </div>
+  <%= live_render(
+    @socket,
+    T3CloneElixirWeb.ChatLive.ChatArea,
+    id: "chat-area-#{@selected_chat_id || "none"}",
+    session: %{
+      "chat_id" => @selected_chat_id,
+      "current_user_id" => @current_user.id,
+      "models" => @models
+    }
+  ) %>
+
+
   </div>
   <!-- Chat Main Area End -->
   <!-- Delete Confirmation Modal -->
