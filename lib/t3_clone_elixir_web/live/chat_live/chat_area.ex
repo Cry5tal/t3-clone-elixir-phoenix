@@ -33,6 +33,14 @@ defmodule T3CloneElixirWeb.ChatLive.ChatArea do
         ""
       end
 
+    # Fetch draft for this chat (if any) from InputDraftServer
+    input_content =
+      if chat_id do
+        T3CloneElixir.InputDraftServer.get_draft(chat_id)
+      else
+        ""
+      end
+
     if connected?(socket) and chat_id do
       Phoenix.PubSub.subscribe(T3CloneElixir.PubSub, "chat:#{chat_id}")
     end
@@ -46,11 +54,22 @@ defmodule T3CloneElixirWeb.ChatLive.ChatArea do
         selected_model: selected_model,
         ai_streaming_message: (if ai_buffer != "", do: ai_buffer, else: nil),
         is_waiting_for_stream: false,
-        input_content: "",
+        input_content: input_content,
         messages_offset: length(messages),
         all_messages_loaded: messages == []
       )
     }
+  end
+
+  # Handle debounced draft updates from client
+  @impl true
+  def handle_event("draft_update", %{"content" => content}, socket) do
+    chat_id = socket.assigns.chat_id
+    # Only save draft if chat_id exists
+    if chat_id do
+      T3CloneElixir.InputDraftServer.set_draft(chat_id, content)
+    end
+    {:noreply, assign(socket, input_content: content)}
   end
 
   # Handle model selection from dropdown
@@ -80,6 +99,10 @@ defmodule T3CloneElixirWeb.ChatLive.ChatArea do
     if !content || String.trim(content) == "" do
       {:noreply, socket}
     else
+      # Clear the draft for this chat when sending a message
+      if socket.assigns.chat_id do
+        T3CloneElixir.InputDraftServer.delete_draft(socket.assigns.chat_id)
+      end
       user_id = socket.assigns.user_id
       chat_id = socket.assigns.chat_id
       models = socket.assigns.models
@@ -113,10 +136,12 @@ defmodule T3CloneElixirWeb.ChatLive.ChatArea do
           # Existing chat: append message and start stream
           case Chats.create_message(chat_id, user_id, content, "user") do
             {:ok, message} ->
-              # Start streaming via ChatServer (use generate_response)
-              chat_history = (socket.assigns[:messages] || []) ++ [message]
+              # Fetch all messages as structs for state/UI
+              messages = Chats.get_all_chat_messages(chat_id)
+              # Map to LLM format only for the LLM call
+              chat_history = Enum.map(messages, fn msg -> %{"role" => msg.who, "content" => msg.content} end)
               ChatServer.generate_response(chat_id, chat_history, model_name)
-              messages = chat_history
+              # Assign messages as structs for everything else
               socket = assign(socket,
                 messages: messages,
                 selected_model: model,

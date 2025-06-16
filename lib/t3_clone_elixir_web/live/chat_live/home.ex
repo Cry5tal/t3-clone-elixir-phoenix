@@ -143,28 +143,4 @@ defmodule T3CloneElixirWeb.ChatLive.Home do
     {:noreply, socket}
   end
 
-  # Handle loading more messages for pagination (infinite scroll)
-  @impl true
-  def handle_event("load_more_messages", _params, socket) do
-    chat_id = socket.assigns.selected_chat_id
-    offset = socket.assigns[:messages_offset] || 0
-    # Fetch next batch (older messages)
-    new_messages =
-      if chat_id do
-        T3CloneElixir.Chats.get_chat_messages(chat_id, 10, offset)
-        |> Enum.sort_by(& &1.inserted_at, {:asc, DateTime})
-      else
-        []
-      end
-    # Merge and deduplicate by id
-    all_messages =
-      (new_messages ++ (socket.assigns[:messages] || []))
-      |> Enum.uniq_by(& &1.id)
-    all_loaded = new_messages == [] or length(new_messages) < 10
-    {:noreply,
-      socket
-      |> assign(messages: all_messages, messages_offset: offset + length(new_messages), all_messages_loaded: all_loaded)
-    }
-  end
-
 end

@@ -20,6 +20,8 @@ defmodule T3CloneElixir.Application do
       {Registry, keys: :unique, name: T3CloneElixir.ChatRegistry},
       # Start the DynamicSupervisor for chat servers
       T3CloneElixir.ChatSupervisor,
+      # Start the InputDraftServer for per-chat input drafts
+      T3CloneElixir.InputDraftServer,
       # Start to serve requests, typically the last entry
       T3CloneElixirWeb.Endpoint
     ]

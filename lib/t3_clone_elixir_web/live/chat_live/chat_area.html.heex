@@ -25,6 +25,10 @@
         <!-- Hidden input to submit selected model id -->
         <input type="hidden" name="model_id" value={@selected_model && @selected_model.id} />
         <div class="flex flex-col w-full bg-bg-300 rounded-2xl px-4 py-3 shadow-inner gap-2 relative">
+          <!--
+            Draft textarea: restores @input_content on mount, sends draft_update on debounced input
+            phx-debounce ensures we don't send every keystroke
+          -->
           <textarea
             id="chat-input-textarea"
             name="content"
@@ -34,7 +38,9 @@
             placeholder="Type your message..."
             class="resize-none bg-transparent text-text-100 px-2 py-2 pr-12 focus:outline-none focus:ring-0 border-none min-h-[40px] max-h-[144px] overflow-y-auto rounded-md"
             style="line-height: 1.5;"
-          ></textarea>
+            phx-debounce="500"
+            phx-change="draft_update"
+          ><%= @input_content %></textarea>
           <div class="flex items-end gap-2 relative min-h-[3.25rem]">
             <!-- Model Dropdown (bottom left) -->
             <div class="relative">
