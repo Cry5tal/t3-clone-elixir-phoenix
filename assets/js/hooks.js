@@ -1,7 +1,6 @@
 // assets/js/hooks.js
 // Custom Phoenix LiveView hooks for the chat input
 import { gsap } from "gsap"
-import 'highlight.js/styles/github.css';
 
 // CopyCode: LiveView hook for copy-to-clipboard on code blocks
 export const CopyCode = {
