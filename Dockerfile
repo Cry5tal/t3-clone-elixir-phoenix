@@ -25,9 +25,15 @@ RUN apt-get update -y && apt-get install -y \
   build-essential \
   git \
   curl \
-  && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-  && apt-get install -y nodejs \
+  ca-certificates \
+  && curl https://sh.rustup.rs -sSf | bash -s -- -y \
   && apt-get clean && rm -f /var/lib/apt/lists/*_*
+
+# Add Rust to PATH
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Force mdex to compile NIF from source
+ENV MDEX_BUILD_NIF=1
 
 # prepare build dir
 WORKDIR /app
