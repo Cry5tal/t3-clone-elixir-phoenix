@@ -27,6 +27,8 @@ RUN apt-get update -y && apt-get install -y \
   curl \
   ca-certificates \
   && curl https://sh.rustup.rs -sSf | bash -s -- -y \
+  && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+  && apt-get install -y nodejs \
   && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # Add Rust to PATH
