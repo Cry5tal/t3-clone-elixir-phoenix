@@ -145,27 +145,28 @@ defmodule T3CloneElixirWeb.ChatLive.HomeComponents.Sidebar do
               </button>
             </li>
             <li>
-              <button
-                type="button"
-                phx-click="open_delete_modal"
-                phx-value-id={@chat.id}
-                phx-value-name={@chat.name}
-                class="w-full text-left flex items-center px-4 py-2 text-red-500 hover:bg-bg-300 rounded transition"
-              >
-                <!-- Trash Icon -->
-                <svg
-                  class="w-5 h-5 text-text-300 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <circle cx="12" cy="5" r="1.5" />
-                  <circle cx="12" cy="12" r="1.5" />
-                  <circle cx="12" cy="19" r="1.5" />
-                </svg>
-                Delete
-              </button>
+            <button
+            type="button"
+            phx-click="open_delete_modal"
+            phx-value-id={@chat.id}
+            phx-value-name={@chat.name}
+            class="w-full text-left flex items-center px-4 py-2 hover:bg-bg-300 rounded transition text-sm font-medium"
+          >
+            <svg
+              class="w-4 h-4 mr-2 text-red-500"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M3 6h18M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zm-8 4v6m4-6v6"
+              />
+            </svg>
+            <span class="text-red-500">Delete</span>
+          </button>
             </li>
           </ul>
         </div>

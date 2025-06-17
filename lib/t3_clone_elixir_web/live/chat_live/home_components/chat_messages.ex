@@ -10,7 +10,12 @@ defmodule T3CloneElixirWeb.Live.ChatLive.HomeComponents.ChatMessages do
     ~H"""
     <div phx-hook="ChatScrollManager" id="chat-messages-container" style="overflow-y: auto; max-height: 70vh;">
       <%= if @messages == [] and is_nil(@streaming_message) do %>
-        <div class="text-center text-text-300">No messages yet.</div>
+        <!-- Welcome screen for empty chat: centered title, subtitle, and chat input -->
+        <div class="flex flex-col items-center justify-center w-full">
+          <h1 class="text-xl font-bold text-text-100 mb-2">Hello Theo</h1>
+          <p class="text-lg text-text-300 mb-8">Welcome to my elixir phoenix t3 chat clone. Enjoy!</p>
+          <!-- The chat input will be rendered below this block in the main layout -->
+        </div>
       <% else %>
         <%= for msg <- @messages do %>
           <div class={[
@@ -99,6 +104,7 @@ defmodule T3CloneElixirWeb.Live.ChatLive.HomeComponents.ChatMessages do
                     <% end %>
                   </div>
                 <% else %>
+                  <!-- Wrap streaming text block for GSAP token animation -->
                   <%= Phoenix.HTML.raw(format_markdown(block)) %>
                 <% end %>
               <% end %>

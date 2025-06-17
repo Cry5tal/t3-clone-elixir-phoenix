@@ -23,7 +23,7 @@ import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import 'flowbite'
 
-import { ModalAnimation, ChatInputAutoGrow, ChatSendButton, ChatTokenStream, DropdownMenuHook, ModelDropdownHook, CopyCode, CopyMessage, ChatScrollManager } from "./hooks.js"
+import { ModalAnimation, ChatInputAutoGrow, ChatSendButton, ChatTokenStream, DropdownMenuHook, ModelDropdownHook, CopyCode, CopyMessage, ChatScrollManager} from "./hooks.js"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {

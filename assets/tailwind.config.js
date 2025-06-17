@@ -17,16 +17,16 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        "primary-100": "#1F3A5F",
-        "primary-200": "#4d648d",
-        "primary-300": "#acc2ef",
-        "accent-100": "#3D5A80",
-        "accent-200": "#cee8ff",
+        "primary-100": "#2E8B57",
+        "primary-200": "#61bc84",
+        "primary-300": "#c6ffe6",
+        "accent-100": "#8FBC8F",
+        "accent-200": "#345e37",
         "text-100": "#FFFFFF",
         "text-200": "#e0e0e0",
-        "bg-100": "#0F1C2E",
-        "bg-200": "#1f2b3e",
-        "bg-300": "#374357",
+        "bg-100": "#1E1E1E",
+        "bg-200": "#2d2d2d",
+        "bg-300": "#454545",
       }
     },
   },

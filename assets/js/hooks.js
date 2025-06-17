@@ -2,6 +2,20 @@
 // Custom Phoenix LiveView hooks for the chat input
 import { gsap } from "gsap"
 
+
+
+
+
+
+// All of this file was vibe coded. Honestly, I dont care
+
+
+
+
+
+
+
+
 // CopyCode: LiveView hook for copy-to-clipboard on code blocks
 export const CopyCode = {
   mounted() {
@@ -146,14 +160,11 @@ export const ModalAnimation = {
 // ChatInputAutoGrow: Handles auto-growing textarea and Enter/Shift+Enter logic for chat input
 export const ChatInputAutoGrow = {
   mounted() {
-    console.log('[ChatInputAutoGrow] mounted, this.el:', this.el);
     // If hook is attached directly to the textarea, use this.el
     const textarea = this.el;
     if (!textarea) {
-      console.warn('[ChatInputAutoGrow] No textarea found!');
       return;
     }
-    console.log('[ChatInputAutoGrow] Found textarea:', textarea);
 
     // Set up to grow up to 10 lines
     const maxRows = 10;
@@ -173,20 +184,16 @@ export const ChatInputAutoGrow = {
         textarea.style.height = scrollHeight + "px";
         textarea.style.overflowY = "hidden";
       }
-      console.log('[ChatInputAutoGrow] updateHeight fired. Height:', textarea.style.height, 'Rows:', textarea.value.split('\n').length);
     };
 
     textarea.addEventListener("input", (e) => {
-      console.log('[ChatInputAutoGrow] input event:', e);
       updateHeight();
     });
 
     // Handle Enter/Shift+Enter logic
     textarea.addEventListener("keydown", function(e) {
-      console.log('[ChatInputAutoGrow] keydown:', e.key, 'shift?', e.shiftKey);
       if (e.key === "Enter" && !e.shiftKey) {
         if (!textarea.value.trim()) {
-          console.log('[ChatInputAutoGrow] Prevent submit: textarea empty');
           e.preventDefault();
           return false;
         }
@@ -196,10 +203,8 @@ export const ChatInputAutoGrow = {
           e.preventDefault(); // Prevent newline
           form.requestSubmit ? form.requestSubmit() : form.submit();
           setTimeout(() => textarea.blur(), 0);
-          console.log('[ChatInputAutoGrow] Enter pressed, form submitted');
         }
       } else if (e.key === "Enter" && e.shiftKey) {
-        console.log('[ChatInputAutoGrow] Shift+Enter: allow new line');
       }
     });
 
@@ -207,15 +212,12 @@ export const ChatInputAutoGrow = {
     const form = textarea.closest("form");
     if (form) {
       form.addEventListener("submit", () => {
-        console.log('[ChatInputAutoGrow] Form submitted, resetting textarea');
         setTimeout(() => {
           textarea.value = "";
           textarea.style.height = "auto";
           textarea.style.overflowY = "hidden";
         }, 10);
       });
-    } else {
-      console.warn('[ChatInputAutoGrow] No parent form found!');
     }
 
     // Initial height
@@ -223,7 +225,8 @@ export const ChatInputAutoGrow = {
   }
 };
 
-// To use: import { ModalAnimation, ChatInputAutoGrow, ChatSendButton, ChatTokenStream, ChatAutoScroll, DropdownMenuHook, ModelDropdownHook } from "./hooks.js" in app.js and register with LiveSocket
+
+
 
 // ChatScrollManager: Infinite scroll + sticky auto-scroll for chat UX
 export const ChatScrollManager = {
@@ -527,6 +530,6 @@ export const ChatSendButton = {
   }
 };
 
-// Dropdown hook for chat three-dots menu
+
 
 

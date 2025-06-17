@@ -10,10 +10,22 @@ defmodule T3CloneElixirWeb.ChatLive.ChatArea do
     chat_id = session["chat_id"]
     user_id = session["current_user_id"]
     models = session["models"] || []
+
+    # Fetch the chat struct if chat_id is present
+    chat =
+      if chat_id do
+        Chats.get_chat!(chat_id)
+      else
+        nil
+      end
+
+    # Pick the selected model by chat.selected_model_id, fallback to first model
     selected_model =
-      case models do
-        [first | _] -> first
-        _ -> nil
+      cond do
+        chat && chat.selected_model_id ->
+          Enum.find(models, fn m -> to_string(m.id) == to_string(chat.selected_model_id) end) || List.first(models)
+        true ->
+          List.first(models)
       end
 
     # Load messages for the chat (if any)
@@ -24,6 +36,7 @@ defmodule T3CloneElixirWeb.ChatLive.ChatArea do
       else
         []
       end
+
 
     # Buffer for streaming/resumable stream
     ai_buffer =
