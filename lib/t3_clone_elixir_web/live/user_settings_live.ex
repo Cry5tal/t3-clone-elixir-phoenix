@@ -76,6 +76,8 @@ defmodule T3CloneElixirWeb.UserSettingsLive do
           </:actions>
         </.simple_form>
       </div>
+
+
     </div>
     """
   end
@@ -106,6 +108,7 @@ defmodule T3CloneElixirWeb.UserSettingsLive do
       |> assign(:email_form, to_form(email_changeset))
       |> assign(:password_form, to_form(password_changeset))
       |> assign(:trigger_submit, false)
+      |> assign(:user_role, user.role)
 
     {:ok, socket}
   end

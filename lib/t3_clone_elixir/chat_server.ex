@@ -66,6 +66,15 @@ defmodule T3CloneElixir.ChatServer do
   def handle_cast(:clear_buffer, state) do
     {:noreply, %{state | buffer: ""}}
   end
+
+    # Handle cancel_stream cast in GenServer
+  def handle_cast(:cancel_stream, state = %{stream_pid: stream_pid}) do
+    # Kill streaming task if alive
+    if is_pid(stream_pid) and Process.alive?(stream_pid), do: Process.exit(stream_pid, :kill)
+    # Notify ourselves to run the normal stream-done logic
+    send(self(), :openrouter_stream_done)
+    {:noreply, %{state | stream_pid: nil}}
+  end
   # Handle incoming OpenRouter streaming tokens and events
   def handle_info({:openrouter_token, content}, state = %{chat_id: chat_id}) do
     topic = "chat:#{chat_id}"
@@ -154,14 +163,7 @@ defmodule T3CloneElixir.ChatServer do
     end
   end
 
-  # Handle cancel_stream cast in GenServer
-  def handle_cast(:cancel_stream, state = %{stream_pid: stream_pid}) do
-    # Kill streaming task if alive
-    if is_pid(stream_pid) and Process.alive?(stream_pid), do: Process.exit(stream_pid, :kill)
-    # Notify ourselves to run the normal stream-done logic
-    send(self(), :openrouter_stream_done)
-    {:noreply, %{state | stream_pid: nil}}
-  end
+
 
   # Public API to get current buffer
   def get_buffer(chat_id) do

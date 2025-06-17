@@ -12,11 +12,11 @@
 #   - Ex: hexpm/elixir:1.18.4-erlang-27.3.4-debian-bullseye-20250520-slim
 #
 ARG ELIXIR_VERSION=1.18.4
-ARG OTP_VERSION=27.3.4
-ARG DEBIAN_VERSION=bullseye-20250520-slim
+ARG OTP_VERSION=27.3.4.1
+ARG DEBIAN_VERSION=noble-20250529
 
-ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
-ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
+ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-ubuntu-${DEBIAN_VERSION}"
+ARG RUNNER_IMAGE="ubuntu:${DEBIAN_VERSION}"
 
 FROM ${BUILDER_IMAGE} as builder
 
@@ -26,16 +26,14 @@ RUN apt-get update -y && apt-get install -y \
   git \
   curl \
   ca-certificates \
+  && curl https://sh.rustup.rs -sSf | bash -s -- -y \
   && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
   && apt-get install -y nodejs \
   && apt-get clean && rm -f /var/lib/apt/lists/*_*
-
 # install rust BEFORE deps.get
-RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
-
-# Force mdex to compile NIF from source
 ENV MDEX_BUILD_NIF=1
+ENV MIX_ENV=prod
 
 # prepare build dir
 WORKDIR /app
@@ -84,7 +82,7 @@ RUN mix release
 FROM ${RUNNER_IMAGE}
 
 RUN apt-get update -y && \
-  apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates \
+  apt-get install -y libstdc++6 openssl libncurses6 locales ca-certificates \
   && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # Set the locale

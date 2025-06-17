@@ -23,13 +23,19 @@ defmodule T3CloneElixir.Application do
       # Start the InputDraftServer for per-chat input drafts
       T3CloneElixir.InputDraftServer,
       # Start to serve requests, typically the last entry
-      T3CloneElixirWeb.Endpoint
+      T3CloneElixirWeb.Endpoint,
+
+      # Setting up an admin from config
+
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: T3CloneElixir.Supervisor]
-    Supervisor.start_link(children, opts)
+    result = Supervisor.start_link(children, opts)
+    # Run admin setup from config
+    Task.start(fn -> T3CloneElixir.AdminSetup.run() end)
+    result
   end
 
   # Tell Phoenix to update the endpoint configuration

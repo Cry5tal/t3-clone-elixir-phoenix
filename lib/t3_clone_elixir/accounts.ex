@@ -44,6 +44,20 @@ defmodule T3CloneElixir.Accounts do
     if User.valid_password?(user, password), do: user
   end
 
+
+
+  @doc """
+    Makes a user admin
+
+    ## Examples
+
+        iex> make_admin("foo@example.com")
+        %User{}
+
+        iex> make_admin("unknown@example.com")
+        nil
+
+  """
   def make_admin(email) do
     user = get_user_by_email(email)
     Repo.update!(Ecto.Changeset.change(user, role: "admin"))
@@ -80,9 +94,15 @@ defmodule T3CloneElixir.Accounts do
 
   """
   def register_user(attrs) do
-    %User{}
-    |> User.registration_changeset(attrs)
-    |> Repo.insert()
+    if Application.get_env(:t3_clone_elixir, :admin_email) == attrs[:email] do
+      User.registration_changeset(%User{}, attrs)
+      |> Repo.insert()
+      |> make_admin()
+    else
+      %User{}
+      |> User.registration_changeset(attrs)
+      |> Repo.insert()
+    end
   end
 
   @doc """

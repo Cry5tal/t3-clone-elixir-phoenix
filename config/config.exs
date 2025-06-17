@@ -63,6 +63,8 @@ config :logger, :console,
 
 
 config :t3_clone_elixir, :openrouter_api_key, System.get_env("OPENROUTER_API_KEY")
+config :t3_clone_elixir, :admin_email, System.get_env("ADMIN_EMAIL")
+config :t3_clone_elixir, :admin_password, System.get_env("ADMIN_PASSWORD")
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
