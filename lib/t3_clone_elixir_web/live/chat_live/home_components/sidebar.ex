@@ -15,7 +15,6 @@ defmodule T3CloneElixirWeb.ChatLive.HomeComponents.Sidebar do
       id="logo-sidebar"
       class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-bg-200 border-r border-bg-300 sm:translate-x-0"
       aria-label="Sidebar"
-      phx-hook="SidebarHook"
     >
       <div class="h-full flex flex-col px-3 pb-4 overflow-y-auto bg-bg-200">
         <!-- New Chat Button -->

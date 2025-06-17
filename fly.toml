@@ -4,7 +4,9 @@
 #
 
 app = 't3-clone-elixir'
-primary_region = 'syd'
+[regions]
+  primary_region = "sin"
+  backup_region = "sjc"
 kill_signal = 'SIGTERM'
 
 [build]

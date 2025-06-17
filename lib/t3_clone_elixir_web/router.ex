@@ -115,4 +115,10 @@ defmodule T3CloneElixirWeb.Router do
       live "/users/confirm", UserConfirmationInstructionsLive, :new
     end
   end
+
+  # Catch-all route for unmatched paths (404)
+  scope "/", T3CloneElixirWeb do
+    pipe_through :browser
+    match :*, "/*path", FallbackController, :not_found
+  end
 end
