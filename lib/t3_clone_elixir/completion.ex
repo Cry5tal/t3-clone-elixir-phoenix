@@ -25,7 +25,7 @@ defmodule T3CloneElixir.Completion do
   end
 
   # Helper: Convert messages to OpenRouter API format
-  # Handles both Ecto structs and maps
+  # Handles both Ecto structs and maps (I dont think it works, honestly)
   defp to_openrouter_messages(chat_history) do
     Enum.map(chat_history, fn msg ->
       cond do

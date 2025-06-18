@@ -77,6 +77,7 @@ defmodule T3CloneElixirWeb.ChatLive.HomeComponents.Sidebar do
   """
   attr :chat, :map, required: true
   attr :selected_chat_id, :string, required: true
+
   def chat_list_item(assigns) do
     ~H"""
     <li class="relative">
@@ -174,5 +175,4 @@ defmodule T3CloneElixirWeb.ChatLive.HomeComponents.Sidebar do
     </li>
     """
   end
-
 end

@@ -113,7 +113,6 @@ export const ModalAnimation = {
     this.modalContent = this.el.querySelector('.modal-content');
     
     if (!this.modalContent) {
-      console.error('Modal content element with class "modal-content" not found');
       return;
     }
     

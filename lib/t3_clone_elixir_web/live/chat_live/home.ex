@@ -2,7 +2,6 @@ defmodule T3CloneElixirWeb.ChatLive.Home do
   use T3CloneElixirWeb, :live_view
 
   alias T3CloneElixir.Chats
-  alias T3CloneElixir.ChatServer
   alias T3CloneElixir.Models
   @impl true
   def mount(_params, _session, socket) do
@@ -34,21 +33,24 @@ defmodule T3CloneElixirWeb.ChatLive.Home do
     )
     {:noreply, socket}
   end
-
   # Modal open/close handlers
+  @impl true
   def handle_event("open_rename_modal", %{"id" => id, "name" => name}, socket) do
     {:noreply, assign(socket, show_rename_modal: true, show_delete_modal: false, modal_chat_id: id, modal_chat_name: name)}
   end
 
+  @impl true
   def handle_event("open_delete_modal", %{"id" => id, "name" => name}, socket) do
     {:noreply, assign(socket, show_delete_modal: true, show_rename_modal: false, modal_chat_id: id, modal_chat_name: name)}
   end
 
+  @impl true
   def handle_event("close_modal", _params, socket) do
     {:noreply, assign(socket, show_rename_modal: false, show_delete_modal: false, modal_chat_id: nil, modal_chat_name: nil)}
   end
 
 
+  @impl true
   def handle_event("rename_chat", %{"name" => name}, socket) do
     chat_id = socket.assigns.modal_chat_id
     chat = Chats.get_chat!(chat_id)
@@ -63,6 +65,7 @@ defmodule T3CloneElixirWeb.ChatLive.Home do
     end
   end
 
+  @impl true
   def handle_event("delete_chat", %{"id" => id}, socket) do
     chat = Chats.get_chat!(id)
     case Chats.delete_chat(chat) do
@@ -84,17 +87,6 @@ defmodule T3CloneElixirWeb.ChatLive.Home do
         {:noreply, socket |> put_flash(:error, "Failed to delete chat: #{inspect(reason)}")}
     end
   end
-
-
-  # Handle event to cancel/stop the AI stream
-  # This simply sends :done to self, which triggers the existing handle_info logic
-  def handle_event("cancel_stream", _params, socket) do
-    # Call the ChatServer to cancel the AI stream for the selected chat
-    T3CloneElixir.ChatServer.cancel_stream(socket.assigns.selected_chat_id)
-    {:noreply, socket}
-  end
-  # Fetch the chat struct before deleting, as delete_chat/1 expects %Chat{} not ID
-
 
   # Handle PubSub updates for chat list
   @impl true

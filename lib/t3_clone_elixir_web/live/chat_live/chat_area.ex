@@ -3,7 +3,6 @@ defmodule T3CloneElixirWeb.ChatLive.ChatArea do
 
   alias T3CloneElixir.Chats
   alias T3CloneElixir.ChatServer
-  alias T3CloneElixir.Models
 
   @impl true
   def mount(_params, session, socket) do
@@ -148,7 +147,7 @@ defmodule T3CloneElixirWeb.ChatLive.ChatArea do
         true ->
           # Existing chat: append message and start stream
           case Chats.create_message(chat_id, user_id, content, "user") do
-            {:ok, message} ->
+            {:ok, _message} ->
               # Fetch all messages as structs for state/UI
               messages = Chats.get_all_chat_messages(chat_id)
               # Map to LLM format only for the LLM call
