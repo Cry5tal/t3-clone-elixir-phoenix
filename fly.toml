@@ -4,15 +4,13 @@
 #
 
 app = 't3-clone-elixir'
-[regions]
-  primary_region = "sin"
-  backup_region = "sjc"
+PRIMARY_REGION = "sin"
 kill_signal = 'SIGTERM'
 
 [build]
 
 [deploy]
-  release_command = '/app/bin/migrate'
+  release_command = "bin/t3_clone_elixir eval \"T3CloneElixir.Release.create_and_migrate()\""
 
 [env]
   PHX_HOST = 't3-clone-elixir.fly.dev'

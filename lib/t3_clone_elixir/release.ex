@@ -1,28 +1,27 @@
 defmodule T3CloneElixir.Release do
-  @moduledoc """
-  Used for executing DB release tasks when run in production without Mix
-  installed.
-  """
   @app :t3_clone_elixir
 
-  def migrate do
-    load_app()
+  def create_and_migrate do
+    primary = System.get_env("PRIMARY_REGION")
+    region  = System.get_env("FLY_REGION")
 
-    for repo <- repos() do
-      {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :up, all: true))
+    if region == primary do
+      Application.load(@app)
+      for repo <- Application.fetch_env!(@app, :ecto_repos) do
+        config = repo.config()
+
+        case repo.__adapter__.storage_up(config) do
+          :ok -> IO.puts("✅ Database created or already exists")
+          {:error, :already_up} -> IO.puts("🔄 DB exists, skip create")
+          {:error, term} -> IO.puts("⚠️ Could not create DB: #{inspect(term)}")
+        end
+
+        Ecto.Migrator.with_repo(repo, fn _ ->
+          Ecto.Migrator.run(repo, :up, all: true)
+        end)
+      end
+    else
+      IO.puts("⏭ Skipping migrations in non-primary region (#{region})")
     end
-  end
-
-  def rollback(repo, version) do
-    load_app()
-    {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :down, to: version))
-  end
-
-  defp repos do
-    Application.fetch_env!(@app, :ecto_repos)
-  end
-
-  defp load_app do
-    Application.load(@app)
   end
 end
