@@ -9,6 +9,12 @@
 
 A high-performance, open-source AI chat app supporting multiple LLM providers, real-time streaming, markdown/code rendering, and more. Built for the [T3 ChatCloneathon](https://coleneathon.t3.chat) competition.
 
+<!-- Showcasing Video -->
+
+**Showcasing Video:**
+
+[![Watch the showcasing video](https://img.youtube.com/vi/unopKBe_ggg/0.jpg)](https://youtu.be/unopKBe_ggg)
+
 ---
 
 ## 🚀 Demo
