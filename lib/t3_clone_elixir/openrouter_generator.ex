@@ -10,7 +10,7 @@ defmodule T3CloneElixir.OpenrouterGenerator do
 
   # Streams chat completion from OpenRouter, sending each chunk to the `receiver` PID.
   # Returns the PID of the spawned process, which can be sent :cancel to stop streaming.
-  #
+  # Most of this is a recreation of the OpenRouter python api, with some modifications for elixir
   # Usage:
   #   pid = OpenrouterGenerator.stream_chat_completion(prompt, model, self())
   #   send(pid, :cancel) # to cancel

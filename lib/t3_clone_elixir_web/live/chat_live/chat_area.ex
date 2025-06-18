@@ -198,6 +198,7 @@ defmodule T3CloneElixirWeb.ChatLive.ChatArea do
     }
   end
 
+
   # Handle incoming AI token stream
   @impl true
   def handle_info({:ai_token, token}, socket) do

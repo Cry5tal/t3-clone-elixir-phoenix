@@ -59,11 +59,7 @@ defmodule T3CloneElixir.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-      {:mdex, "~> 0.7.0"},
-      #remove later
-
-      {:hexdocs_mcp, "~> 0.4.1", only: :dev, runtime: false},
-
+      {:mdex, "~> 0.7.0"}
     ]
   end
 

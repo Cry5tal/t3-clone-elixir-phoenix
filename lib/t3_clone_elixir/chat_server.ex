@@ -45,14 +45,6 @@ defmodule T3CloneElixir.ChatServer do
     {:noreply, %{state | buffer: "", stream_pid: stream_pid}}
   end
 
-  # Backwards compatibility for old calls
-  def handle_cast({:generate_response, chat_history}, state = %{chat_id: chat_id, buffer: _buffer}) do
-    IO.inspect({chat_id, chat_history}, label: "[ChatServer] handle_cast :generate_response")
-    # Call Completion.generate directly, which returns the streaming process PID
-    stream_pid = T3CloneElixir.Completion.generate(chat_id, chat_history, self(), "openai/gpt-4o")
-    {:noreply, %{state | buffer: "", stream_pid: stream_pid}}
-  end
-
   # Handle appending tokens to buffer
   def handle_cast({:buffer_token, token}, state) do
     new_buffer =

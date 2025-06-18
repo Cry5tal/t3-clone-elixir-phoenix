@@ -116,8 +116,10 @@ defmodule T3CloneElixirWeb.CoreComponents do
       role="alert"
       class={[
         "fixed top-2 right-2 mr-2 w-80 sm:w-96 z-50 rounded-lg p-3 ring-1",
-        @kind == :info && "bg-accent-200 text-primary-100 ring-primary-200 fill-primary-100",
-        @kind == :error && "bg-bg-300 text-accent-200 shadow-md ring-accent-100 fill-accent-200"
+        # Info flash: accent background, strong white text, matching ring/fill
+        @kind == :info && "bg-accent-200 text-text-100 ring-primary-200 fill-primary-100",
+        # Error flash: strong ruby red for bg/text/ring/fill
+        @kind == :error && "bg-ruby text-white ring-ruby fill-white shadow-md"
       ]}
       {@rest}
     >

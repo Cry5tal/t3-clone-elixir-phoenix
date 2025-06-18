@@ -22,6 +22,7 @@ module.exports = {
         "primary-300": "#c6ffe6",
         "accent-100": "#8FBC8F",
         "accent-200": "#345e37",
+        "ruby": "#e11d48", // strong ruby red for error flashes
         "text-100": "#FFFFFF",
         "text-200": "#e0e0e0",
         "bg-100": "#1E1E1E",
