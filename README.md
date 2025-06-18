@@ -51,7 +51,7 @@ Click to jump to details:
 - [Multi-Provider LLM Chat](#multi-provider-llm-chat)
 - [Authentication & Sync](#authentication--sync)
 - [Streaming Responses](#streaming-responses)
-- [Chat CRUD & Branching](#chat-crud--branching)
+- [Chat CRUD](#chat-crud)
 - [Resumable Streams and Stream Cancellation](#resumable-streams-and-stream-cancellation)
 - [User Input Drafts](#user-input-drafts)
 - [Fast ETS Caching](#fast-ets-caching)
@@ -186,11 +186,8 @@ fly auth login
 # 3. Launch (creates fly.toml)
 fly launch
 
-# 4. Deploy
-fly deploy
-
 # 5. Open your deployed app
-fly open
+fly apps open
 ```
 
 See [Fly.io Phoenix guide](https://fly.io/docs/elixir/getting-started/) for production DB setup.
