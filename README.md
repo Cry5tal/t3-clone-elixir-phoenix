@@ -7,7 +7,7 @@
 
 ▶️ [Check out the hosted app here!](https://t3-clone-elixir.fly.dev/)
 
-A high-performance, open-source AI chat app supporting multiple LLM providers, real-time streaming, branching, markdown/code rendering, and more. Built for the [T3 ChatCloneathon](https://coleneathon.t3.chat) competition.
+A high-performance, open-source AI chat app supporting multiple LLM providers, real-time streaming, markdown/code rendering, and more. Built for the [T3 ChatCloneathon](https://coleneathon.t3.chat) competition.
 
 ---
 
