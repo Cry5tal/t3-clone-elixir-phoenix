@@ -201,8 +201,6 @@ See [Fly.io Phoenix guide](https://fly.io/docs/elixir/getting-started/) for prod
 - Register/login
 - Start a new chat, select model/provider
 - Type your prompt and enjoy real-time streaming
-- Upload files to enhance your prompts
-- Branch or share conversations
 
 ---
 
