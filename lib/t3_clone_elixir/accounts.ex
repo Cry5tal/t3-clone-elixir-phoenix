@@ -97,7 +97,10 @@ defmodule T3CloneElixir.Accounts do
     if Application.get_env(:t3_clone_elixir, :admin_email) == attrs[:email] do
       User.registration_changeset(%User{}, attrs)
       |> Repo.insert()
-      |> make_admin()
+      |> case do
+        {:ok, user} -> make_admin(user.email)
+        error -> error
+      end
     else
       %User{}
       |> User.registration_changeset(attrs)

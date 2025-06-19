@@ -11,7 +11,6 @@ kill_signal = 'SIGTERM'
 
 [deploy]
   release_command = "bin/t3_clone_elixir eval \"T3CloneElixir.Release.create_and_migrate()\""
-
 [env]
   PHX_HOST = 't3-clone-elixir.fly.dev'
   PORT = '8080'
@@ -19,9 +18,9 @@ kill_signal = 'SIGTERM'
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = 'stop'
+  auto_stop_machines = false
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
   processes = ['app']
 
   [http_service.concurrency]
