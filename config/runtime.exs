@@ -8,10 +8,12 @@ if config_env() == :prod do
 
   admin_email = System.get_env("ADMIN_EMAIL")
   admin_password = System.get_env("ADMIN_PASSWORD")
+  openrouter_api_key = System.get_env("OPENROUTER_API_KEY")
 
   config :t3_clone_elixir,
     admin_email: admin_email,
-    admin_password: admin_password
+    admin_password: admin_password,
+    openrouter_api_key: openrouter_api_key
   primary_region = System.get_env("PRIMARY_REGION")
   fly_region     = System.get_env("FLY_REGION")
   database_url   = System.get_env("DATABASE_URL") ||
