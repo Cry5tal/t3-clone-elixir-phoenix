@@ -208,7 +208,7 @@ See [Fly.io Phoenix guide](https://fly.io/docs/elixir/getting-started/) for prod
 ---
 
 ## 🤝 Contributing
-PRs and issues welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) (or open an issue).
+PRs and issues welcome!
 
 ---
 
