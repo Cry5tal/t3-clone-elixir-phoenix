@@ -13,8 +13,13 @@ defmodule T3CloneElixir.AdminSetup do
         })
         Accounts.make_admin(user.email)
         :ok
-      user ->
-        # Always elevate to admin if user exists
+
+      %Accounts.User{role: "admin"} ->
+        # Already admin, nothing to do
+        :ok
+
+      %Accounts.User{role: _other} = user ->
+        # User exists but is not admin, promote
         Accounts.make_admin(user.email)
         :ok
     end
