@@ -36,6 +36,11 @@ if config_env() == :prod do
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "20"),
     socket_options: if(System.get_env("ECTO_IPV6") in ["true", "1"], do: [:inet6], else: [])
 
+  # Disable email delivery in production (demo mode)
+  config :t3_clone_elixir, T3CloneElixir.Mailer,
+    adapter: Swoosh.Adapters.Logger
+
+
   # Configure Endpoint at runtime
   endpoint_config = [
     url: [host: System.get_env("PHX_HOST") || "", port: 443, scheme: "https"],
